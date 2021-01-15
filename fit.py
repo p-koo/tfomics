@@ -133,7 +133,7 @@ class Trainer():
       loss_all.append(loss)
       pred_all.append(pred)
     print(loss_all)
-    return np.concatenate(loss_all, axis=0), np.concatenate(pred_all, axis=0)
+    return np.array(loss_all), np.concatenate(pred_all, axis=0)
 
     
   def update_metrics(self, name, loss, label, prediction, verbose=True):
