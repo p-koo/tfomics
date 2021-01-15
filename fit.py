@@ -58,7 +58,7 @@ class Trainer():
 
     metric_names = []
     for metric in model.metrics:
-        .append(metric.name)
+        metric_names.append(metric.name)
     self.metrics = TrainMetrics(metric_names)
 
 
