@@ -73,16 +73,14 @@ class Trainer():
 
   @tf.function
   def predict_step(self, x):
-    with tf.GradientTape() as tape:
-      predictions = self.model(x, training=False)
+    predictions = self.model(x, training=False)
     return predictions
 
 
   @tf.function
   def loss_predict_step(self, x, y):
-    with tf.GradientTape() as tape:
-      predictions = self.model(x, training=False)
-      loss = self.model.loss(y, predictions)
+    predictions = self.model(x, training=False)
+    loss = self.model.loss(y, predictions)
 
     return loss, predictions
 
@@ -134,6 +132,7 @@ class Trainer():
       loss, pred = self.loss_predict_step(x, y)
       loss_all.append(loss)
       pred_all.append(pred)
+    print(loss_all)
     return np.concatenate(loss_all, axis=0), np.concatenate(pred_all, axis=0)
 
     
