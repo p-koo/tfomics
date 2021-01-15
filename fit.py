@@ -127,10 +127,10 @@ class Trainer():
     #pred = self.model.predict(x, batch_size=batch_size)  
     #loss = self.model.loss(y, pred)
 
-    dataset = tf.data.Dataset.from_tensor_slices(x)
+    dataset = tf.data.Dataset.from_tensor_slices((x,y))
     loss_all = []
     pred_all = []
-    for x in dataset.batch(batch_size):
+    for (x,y) in dataset.batch(batch_size):
       loss, pred = self.loss_predict_step(x, y)
       loss_all.append(loss)
       pred_all.append(pred)
