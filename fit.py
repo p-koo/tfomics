@@ -53,9 +53,12 @@ def fit_lr_decay(model, x_train, y_train, validation_data, metrics=['loss', 'aur
 
 
 class Trainer():
-  def __init__(self, model, metric_names):
+  def __init__(self, model):
     self.model = model
-    self.metric_names = metric_names
+
+    metric_names = []
+    for metric in model.metrics:
+        .append(metric.name)
     self.metrics = TrainMetrics(metric_names)
 
 
@@ -109,7 +112,6 @@ class Trainer():
     results = self.model.evaluate(x, y, verbose=False)
     metric_dic = {}
     for i, metric in enumerate(self.model.metrics):
-        print(metric.name)
         metric_dic[metric.name] = results[i+1]
     self.metrics.update(name, loss=results[0])
     self.metrics.update(name, **metric_dic)
@@ -135,21 +137,6 @@ class Trainer():
   def print_metrics(self, name):
     self.metrics.print(name)
 
-
-  def calculate_metrics(self, label, pred):      
-    metric_vals = {}
-    if 'acc' in self.metric_names:
-      metric_vals['acc'] = metrics.accuracy(label, pred)
-    if 'auroc' in self.metric_names:
-      metric_vals['auroc'] = metrics.auroc(label, pred)
-    if 'aupr' in self.metric_names:
-      metric_vals['aupr'] = metrics.aupr(label, pred)
-    if 'rsquare' in self.metric_names:
-      metric_vals['rsquare'] = metrics.rsquare(label, pred)
-    if 'corr' in self.metric_names:
-      metric_vals['corr'] = metrics.pearsonr(label, pred)
-    return metric_vals
-    
 
   def set_lr_decay(self, decay_rate, patience, metric):
     self.lr_decay = LRDecay(optimizer=self.model.optimizer, decay_rate=decay_rate, 
