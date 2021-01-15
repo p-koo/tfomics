@@ -63,7 +63,7 @@ class Trainer():
   def train_step(self, x, y):
     with tf.GradientTape() as tape:
       predictions = self.model(x, training=True)
-      loss = self.model.loss(y, predictions, training=True)
+      loss = self.model.loss(y, predictions)
       gradients = tape.gradient(loss, self.model.trainable_variables)
       
     # Update the weights of our linear layer.
@@ -82,7 +82,7 @@ class Trainer():
   def loss_predict_step(self, x, y):
     with tf.GradientTape() as tape:
       predictions = self.model(x, training=False)
-      loss = self.model.loss(y, predictions, training=True)
+      loss = self.model.loss(y, predictions)
 
     return loss, predictions
 
