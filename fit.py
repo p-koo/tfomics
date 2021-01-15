@@ -106,8 +106,8 @@ class Trainer():
     return loss, pred
 
     
-  def evaluate(self, name, x, y, verbose=True):
-    results = self.model.evaluate(x, y, verbose=False)
+  def evaluate(self, name, x, y, batch_size=128, verbose=True):
+    results = self.model.evaluate(x, y, batch_size=batch_size, verbose=0)
     metric_dic = {}
     for i, metric in enumerate(self.model.metrics):
         metric_dic[metric.name] = results[i+1]

@@ -1,7 +1,6 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-from . import utils
 
 class Explainer():
   """wrapper class for attribution maps"""
@@ -14,12 +13,12 @@ class Explainer():
 
   def saliency_maps(self, X, batch_size=128):
     
-    return utils.function_batch(X, saliency_map, batch_size, model=self.model, 
+    return function_batch(X, saliency_map, batch_size, model=self.model, 
                           class_index=self.class_index, func=self.func) 
 
   def smoothgrad(self, X, num_samples=50, mean=0.0, stddev=0.1):
     
-    return utils.function_batch(X, smoothgrad, batch_size=1, model=self.model, 
+    return function_batch(X, smoothgrad, batch_size=1, model=self.model, 
                            num_samples=num_samples, mean=mean, stddev=stddev,
                            class_index=self.class_index, func=self.func) 
 
@@ -58,7 +57,7 @@ class Explainer():
 
   def set_baseline(self, x, baseline, num_samples):
     if baseline == 'random':
-      baseline = utils.random_shuffle(x, num_samples)
+      baseline = random_shuffle(x, num_samples)
     else:
       baseline = np.zeros((x.shape))
     return baseline
@@ -228,3 +227,24 @@ def filter_activations(x_test, model, layer=3, window=20, threshold=0.5):
 # Useful functions
 #------------------------------------------------------------------------------
 
+
+def function_batch(X, fun, batch_size=128, **kwargs):
+  """ run a function in batches """
+
+  dataset = tf.data.Dataset.from_tensor_slices(X)
+  outputs = []
+  for x in dataset.batch(batch_size):
+    outputs.append(fun(x, **kwargs))
+  return np.concatenate(outputs, axis=0)
+
+
+
+def random_shuffle(x, num_samples=1):
+  """ randomly shuffle sequences 
+      assumes x shape is (N,L,A) """
+
+  x_shuffle = []
+  for i in range(num_samples):
+    shuffle = np.random.permutation(x.shape[1])
+    x_shuffle.append(x[0,shuffle,:])
+  return np.array(x_shuffle)
