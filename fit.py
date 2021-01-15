@@ -132,7 +132,6 @@ class Trainer():
       loss, pred = self.loss_predict_step(x, y)
       loss_all.append(loss)
       pred_all.append(pred)
-    print(loss_all)
     return np.array(loss_all), np.concatenate(pred_all, axis=0)
 
     
