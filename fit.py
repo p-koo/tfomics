@@ -154,7 +154,7 @@ class Trainer():
 
   def check_lr_decay(self, val):
     if self.lr_decay.status(val):
-      self.lr_decay.decay_learning_rate(optimizer)
+      self.lr_decay.decay_learning_rate(self.optimizer)
       print('  Decaying learning rate to %.6f'%(self.lr))
 
 
