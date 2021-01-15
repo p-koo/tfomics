@@ -72,7 +72,7 @@ class Trainer():
   def train_epoch(self, trainset, shuffle=True, batch_size=128, verbose=True):
     if shuffle:
       batch_dataset = trainset.shuffle(buffer_size=batch_size).batch(batch_size)
-    num_batches = len(batch_dataset)
+    num_batches = len(list(batch_dataset))
     
     running_loss = 0.
     pred_batch = []
