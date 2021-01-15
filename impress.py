@@ -38,17 +38,39 @@ def plot_filters(W, fig, num_cols=8, alphabet='ACGT'):
     for a in range(A):
       for l in range(filter_len):
         counts_df.iloc[l,a] = logo[l,a]
+  return counts_df
 
-    # Plot filter representation
-    logomaker.Logo(counts_df, ax=ax)
-    ax = plt.gca()
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    ax.yaxis.set_ticks_position('none')
-    ax.xaxis.set_ticks_position('none')
-    plt.xticks([])
-    plt.yticks([])
+  
 
+
+def matrix_to_df(x, w, alphabet='ACGT'):
+  """generate pandas dataframe for saliency plot
+     based on grad x inputs """
+
+  L, A = w.shape
+  counts_df = pd.DataFrame(data=0.0, columns=list(alphabet), index=list(range(L)))
+  for a in range(A):
+      for l in range(L):
+          counts_df.iloc[l,a] = w[l,a]
+  return counts_df
+
+
+
+def prob_to_info_df(w, alphabet='ACGT'):
+  """generate pandas dataframe for saliency plot
+     based on grad x inputs """
+
+
+  # Calculate sequence logo heights -- information
+  I = np.log2(4) + np.sum(w * np.log2(w+1e-7), axis=1, keepdims=True)
+  logo = I*w
+
+  L, A = logo.shape
+  counts_df = pd.DataFrame(data=0.0, columns=list(alphabet), index=list(range(L)))
+  for a in range(A):
+      for l in range(L):
+          counts_df.iloc[l,a] = logo[l,a]
+  return counts_df
 
 
 def grad_times_input_to_df(x, grad, alphabet='ACGT'):
