@@ -148,15 +148,12 @@ class Trainer():
     
 
   def set_lr_decay(self, decay_rate, patience, metric):
-    self.lr_decay = LRDecay(lr=self.model.optimizer.lr, decay_rate=decay_rate, 
+    self.lr_decay = LRDecay(optimizer=self.model.optimizer, decay_rate=decay_rate, 
                             patience=patience, metric=metric)
 
 
   def check_lr_decay(self, val):
-    if self.lr_decay.status(val):
-      self.lr_decay.decay_learning_rate(self.model.optimizer)
-      print('  Decaying learning rate to %.6f'%(self.lr))
-
+  	self.lr_decay.check(val)
 
 
 #------------------------------------------------------------------------------------------
@@ -165,9 +162,10 @@ class Trainer():
 
 
 class LRDecay():
-  def __init__(self, lr=0.001, decay_rate=0.3, patience=10, metric='loss'):
+  def __init__(self, optimizer, decay_rate=0.3, patience=10, metric='loss'):
 
-    self.lr = lr
+  	self.optimizer = optimizer
+    self.lr = optimizer.lr
     self.decay_rate = decay_rate
     self.patience = patience
     self.metric = metric
@@ -196,9 +194,14 @@ class LRDecay():
         status = True
     return status
 
-  def decay_learning_rate(self, optimizer):
+  def decay_learning_rate(self):
     self.lr = self.lr * self.decay_rate
-    optimizer.learning_rate.assign(self.lr )
+    self.optimizer.learning_rate.assign(self.lr )
+
+  def check(self, val):
+    if self.lr_decay.status(val):
+      self.lr_decay.decay_learning_rate()
+      print('  Decaying learning rate to %.6f'%(self.lr))
 
       
 
