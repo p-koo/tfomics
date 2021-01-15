@@ -20,7 +20,7 @@ def fit_lr_decay(model, x_train, y_train, validation_data, metrics=['loss', 'aur
   trainset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 
   # set up trainer
-  trainer = Trainer(model, metrics)
+  trainer = Trainer(model)
   trainer.set_lr_decay(decay_rate=lr_decay, patience=lr_patience, metric=lr_metric)
 
   for epoch in range(num_epochs):  
