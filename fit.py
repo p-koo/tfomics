@@ -71,20 +71,6 @@ class Trainer():
     return loss, predictions
 
 
-  @tf.function
-  def predict_step(self, x):
-    predictions = self.model(x, training=False)
-    return predictions
-
-
-  @tf.function
-  def loss_predict_step(self, x, y):
-    predictions = self.model(x, training=False)
-    loss = self.model.loss(y, predictions)
-
-    return loss, predictions
-
-
   def train_epoch(self, trainset, shuffle=True, batch_size=128, verbose=True):
     if shuffle:
       batch_dataset = trainset.shuffle(buffer_size=batch_size).batch(batch_size)
@@ -108,31 +94,15 @@ class Trainer():
     return running_loss/(i+1), pred, y
 
 
-  def predict_batch(self, x, batch_size=128):
-
-    dataset = tf.data.Dataset.from_tensor_slices(x)
-    pred = []
-    for x in dataset.batch(batch_size):
-      pred.append(self.predict_step(x, y))
-    return np.concatenate(pred, axis=0)
-
-    
-    # pred = self.model.predict(x, batch_size=batch_size)  
+  def predict(self, x, batch_size=128):
+    pred = self.model.predict(x, batch_size=batch_size)  
     return pred
 
 
   def loss_predict(self, x, y, batch_size=128):
-    #pred = self.model.predict(x, batch_size=batch_size)  
-    #loss = self.model.loss(y, pred)
-
-    dataset = tf.data.Dataset.from_tensor_slices((x,y))
-    loss_all = []
-    pred_all = []
-    for (x,y) in dataset.batch(batch_size):
-      loss, pred = self.loss_predict_step(x, y)
-      loss_all.append(loss)
-      pred_all.append(pred)
-    return np.array(loss_all), np.concatenate(pred_all, axis=0)
+    pred = self.model.predict(x, batch_size=batch_size)  
+    loss = self.model.loss(y, pred)
+    return loss, pred
 
     
   def update_metrics(self, name, loss, label, prediction, verbose=True):
