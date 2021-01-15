@@ -108,7 +108,7 @@ class Trainer():
   def evaluate(self, name, x, y, verbose=True):
     results = self.model.evaluate(x, y, verbose=False)
     metric_dic = {}
-    for i, metric in enumerate(model.metrics):
+    for i, metric in enumerate(self.model.metrics):
         metric_dic[metric.name] = results[i+1]
     self.metrics.update(name, loss=results[0])
     self.metrics.update(name, **metric_dic)
