@@ -26,28 +26,36 @@ class Explainer():
 
   def integrated_grad(self, X, baseline_type='random', num_steps=50):
 
-    outputs = []
+    scores = []
     for x in X:
       x = np.expand_dims(x, axis=0)
       baseline = self.set_baseline(x, baseline_type, num_samples=1)
       intgrad_scores = integrated_grad(x, model=self.model, baseline=baseline,
                            num_steps=num_steps, class_index=self.class_index, func=self.func)
-      outputs.append(intgrad_scores)
-    return np.concatenate(outputs, axis=0)
+      scores.append(intgrad_scores)
+    return np.concatenate(scores, axis=0)
 
 
   def expected_integrated_grad(self, X, num_baseline=25, baseline_type='random', num_steps=50):
     
-    outputs = []
+    scores = []
     for x in X:
       x = np.expand_dims(x, axis=0)
       baselines = self.set_baseline(x, baseline_type, num_samples=num_baseline)
       intgrad_scores = expected_integrated_grad(x, model=self.model, baselines=baselines,
                            num_steps=num_steps, class_index=self.class_index, func=self.func)
-      outputs.append(intgrad_scores)
-    return np.concatenate(outputs, axis=0)
+      scores.append(intgrad_scores)
+    return np.concatenate(scores, axis=0)
 
- 
+
+  def mutagenesis(self, X, class_index=None):
+    scores = []
+    for x in X:
+      x = np.expand_dims(x, axis=0)
+      scores.append(mutagenesis(x, self.model, class_index))
+    return np.concatenate(scores, axis=0)
+
+
   def set_baseline(self, x, baseline, num_samples):
     if baseline == 'random':
       baseline = random_shuffle_sequence(x, num_samples)
@@ -228,6 +236,8 @@ def function_batch(X, fun, batch_size=128, **kwargs):
   outputs = []
   for x in enumerate(dataset.batch(batch_size)):
     outputs.append(fun(x, **kwargs))
+  print(len(outputs))
+  print(np.concatenate(outputs, axis=0).shape)
   return np.concatenate(outputs, axis=0)
 
 
