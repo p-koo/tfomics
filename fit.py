@@ -29,11 +29,9 @@ def fit_lr_decay(model, x_train, y_train, validation_data, metrics=['loss', 'aur
     # train step
     train_loss, pred, y = trainer.train_epoch(trainset, shuffle=shuffle, 
                                               batch_size=batch_size, verbose=verbose)
-    trainer.update_metrics('train', train_loss, y, pred, verbose=0)
-
+    
     # validation performance
-    valid_loss, pred = trainer.loss_predict(x_valid, y_valid, batch_size)
-    trainer.update_metrics('valid', valid_loss, y_valid, pred, verbose=verbose)
+    trainer.evaluate('valid', x_valid, y_valid, verbose=1)
 
     # check learning rate decay      
     trainer.check_lr_decay(trainer.metrics.valid.value[lr_metric][-1])
@@ -56,7 +54,7 @@ class Trainer():
   def __init__(self, model):
     self.model = model
 
-    metric_names = []
+    metric_names = ['loss']
     for metric in model.metrics:
         metric_names.append(metric.name)
     self.metrics = TrainMetrics(metric_names)
