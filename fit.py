@@ -42,6 +42,8 @@ def fit_lr_decay(model, x_train, y_train, validation_data, metrics=['loss', 'aur
     if trainer.early_stopping(es_metric, patience=es_patience):
       print("Patience ran out... Early stopping.")
       break
+  
+  return trainer
 
 
 

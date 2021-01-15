@@ -55,14 +55,15 @@ def grad_times_input_to_df(x, grad, alphabet='ACGT'):
   """generate pandas dataframe for saliency plot
      based on grad x inputs """
 
-  N, L, A = x.shape
   x_index = np.argmax(np.squeeze(x), axis=1)
+  grad = np.squeeze(grad)
+  L, A = grad.shape
 
   seq = ''
   saliency = np.zeros((L))
   for i in range(L):
     seq += alphabet[x_index[i]]
-    saliency[i] = grad[0,i,x_index[i]]
+    saliency[i] = grad[i,x_index[i]]
 
   # create saliency matrix
   saliency_df = logomaker.saliency_to_matrix(seq=seq, values=saliency)
@@ -74,22 +75,20 @@ def l2_norm_to_df(x, scores, alphabet='ACGT'):
   """generate pandas dataframe for saliency plot
      based on l2-norm of scores (i.e. mutagenesis) """
 
-  N, L, A = x.shape
-
-  # get indices of sequence
-  x_index = np.argmax(np.squeeze(x), axis=1)
-  
+  x = np.squeeze(x)
+  x_index = np.argmax(x, axis=1)
+  scores = np.squeeze(scores)
+  L, A = scores.shape
 
   # calculate l2-norm
-  scores = np.sqrt(np.sum(scores**2, axis=2, keepdims=True) + 1e-10)
-  scores =  x * scores
+  scores = np.sqrt(np.sum(scores**2, axis=1) + 1e-10)
 
   # create dataframe
   seq = ''
   saliency = np.zeros((L))
   for i in range(L):
     seq += alphabet[x_index[i]]
-    saliency[i] = scores[0,i,x_index[i]]
+    saliency[i] = scores[i]
 
   # create saliency matrix
   saliency_df = logomaker.saliency_to_matrix(seq=seq, values=saliency)
