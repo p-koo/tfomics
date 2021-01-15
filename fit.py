@@ -36,7 +36,7 @@ def fit_lr_decay(model, x_train, y_train, validation_data, metrics=['loss', 'aur
     trainer.update_metrics('valid', valid_loss, y_valid, pred, verbose=verbose)
 
     # check learning rate decay      
-    trainer.check_lr_decay(trainer.train_metrics.valid_metric.value[lr_metric][-1])
+    trainer.check_lr_decay(trainer.metrics.valid.value[lr_metric][-1])
 
     # check early stopping
     if trainer.early_stopping(es_metric, patience=es_patience):
@@ -124,7 +124,7 @@ class Trainer():
        runs out"""
 
     status = False
-    vals = self.metrics.valid_metric.value[metric]
+    vals = self.metrics.valid.value[metric]
     if metric == 'loss':
       index = np.argmin(vals)
     else:
