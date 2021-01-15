@@ -137,11 +137,9 @@ class Trainer():
     if 'acc' in self.metric_names:
       metric_vals['acc'] = metrics.accuracy(label, pred)
     if 'auroc' in self.metric_names:
-      score, roc_curves = metrics.auroc(label, pred)
-      metric_vals['auroc'] = score
+      metric_vals['auroc'] = metrics.auroc(label, pred)
     if 'aupr' in self.metric_names:
-      score, pr_curves = metrics.aupr(label, pred)
-      metric_vals['aupr'] = score
+      metric_vals['aupr'] = metrics.aupr(label, pred)
     if 'rsquare' in self.metric_names:
       metric_vals['rsquare'] = metrics.rsquare(label, pred)
     if 'corr' in self.metric_names:

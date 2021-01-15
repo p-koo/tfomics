@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics import roc_curve, auc, precision_recall_curve, accuracy_score
+from sklearn.metrics import roc_auc_score, average_precision_score, accuracy_score
 from scipy import stats
 
 
@@ -8,14 +8,10 @@ def auroc(label, prediction):
      Input shapes are (N,C) where N is the # of data 
     and C is the # of classes. """
   num_labels = label.shape[1]
-  roc_curves = []
   auroc_score = np.zeros((num_labels))
   for i in range(num_labels):
-    fpr, tpr, thresholds = roc_curve(label[:,i], prediction[:,i])
-    score = auc(fpr, tpr)
-    auroc_score[i]= score
-    roc_curves.append((fpr, tpr))
-  return auroc_score, roc_curves
+    auroc_score[i] = roc_auc_score(label[:,i], prediction[:,i])
+  return auroc_score
 
 
 def aupr(label, prediction):
@@ -23,14 +19,10 @@ def aupr(label, prediction):
      Input shapes are (N,C) where N is the # of data 
     and C is the # of classes. """
   num_labels = label.shape[1]
-  pr_curves = []
   aupr_score = np.zeros((num_labels))
   for i in range(num_labels):
-    precision, recall, thresholds = precision_recall_curve(label[:,i], prediction[:,i])    
-    score = auc(recall, precision)
-    aupr_score[i]= score
-    pr_curves.append((precision, recall))
-  return aupr_score, pr_curves
+    aupr_score[i]= average_precision_score(label[:,i], prediction[:,i])  
+  return aupr_score
 
   
 def accuracy(label, prediction):
