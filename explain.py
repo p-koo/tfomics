@@ -235,6 +235,7 @@ def function_batch(X, fun, batch_size=128, **kwargs):
   dataset = tf.data.Dataset.from_tensor_slices(X)
   outputs = []
   for x in enumerate(dataset.batch(batch_size)):
+    print(x.shape)
     outputs.append(fun(x, **kwargs))
   print(len(outputs))
   print(np.concatenate(outputs, axis=0).shape)
