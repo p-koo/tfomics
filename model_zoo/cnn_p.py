@@ -1,7 +1,7 @@
 from tensorflow import keras
 
 
-def cnn_p(shape, num_labels, activation='relu', pool_size=25, units=[32, 128, 512], 
+def model(shape, num_labels, activation='relu', pool_size=25, units=[32, 128, 512], 
           dropout=[0.1, 0.1, 0.5], l2=None):
   L, A = shape
   pool_size2 = L // pool_size

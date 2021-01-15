@@ -177,6 +177,7 @@ def filter_activations(x_test, model, layer=3, window=20, threshold=0.5):
   # get feature maps of 1st convolutional layer after activation
   intermediate = keras.Model(inputs=model.inputs, outputs=model.layers[layer].output)
   fmap = intermediate.predict(x_test)
+  N,L,A = x_test.shape
 
   # Set the left and right window sizes
   window_left = int(window/2)
@@ -222,7 +223,7 @@ def filter_activations(x_test, model, layer=3, window=20, threshold=0.5):
 
 def function_batch(X, fun, batch_size=128, **kwargs):
   """ run a function in batches """
-  
+
   dataset = tf.data.Dataset.from_tensor_slices(X)
   outputs = []
   for x in enumerate(dataset.batch(batch_size)):
