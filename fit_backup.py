@@ -56,7 +56,7 @@ class Trainer():
   def __init__(self, model, metric_names):
     self.model = model
     self.metric_names = metric_names
-    self.metrics = TrainMetrics(metric_names)
+    self.train_metrics = TrainMetrics(metric_names)
 
 
   @tf.function
@@ -105,15 +105,12 @@ class Trainer():
     return loss, pred
 
     
-  def evaluate(self, name, x, y, verbose=True):
-    results = self.model.evaluate(x, y, verbose=False)
-    metric_dic = {}
-    for i, metric in enumerate(model.metrics):
-        metric_dic[metric.name] = results[i+1]
-    self.metrics.update(name, loss=results[0])
-    self.metrics.update(name, **metric_dic)
+  def update_metrics(self, name, loss, label, prediction, verbose=True):
+    self.train_metrics.update(name, loss=loss)
+    metric_vals = self.calculate_metrics(label, prediction)
+    self.train_metrics.update(name, **metric_vals)
     if verbose:
-        self.metrics.print(name)
+        self.train_metrics.print(name)
 
 
   def early_stopping(self, metric, patience):
@@ -121,7 +118,7 @@ class Trainer():
        runs out"""
 
     status = False
-    vals = self.metrics.valid_metric.value[metric]
+    vals = self.train_metrics.valid_metric.value[metric]
     if metric == 'loss':
       index = np.argmin(vals)
     else:
@@ -132,7 +129,7 @@ class Trainer():
 
 
   def print_metrics(self, name):
-    self.metrics.print(name)
+    self.train_metrics.print(name)
 
 
   def calculate_metrics(self, label, pred):      
@@ -214,26 +211,26 @@ class LRDecay():
 class TrainMetrics():
   """wrapper class for monitoring training metrics"""
   def __init__(self, metric_names):
-    self.train = MonitorMetrics(metric_names)
-    self.valid = MonitorMetrics(metric_names)
-    self.test = MonitorMetrics(metric_names)
+    self.train_metric = MonitorMetrics(metric_names)
+    self.valid_metric = MonitorMetrics(metric_names)
+    self.test_metric = MonitorMetrics(metric_names)
 
 
   def update(self, name, **kwargs):
     if name == 'train':
-      self.train.update(**kwargs)   
+      self.train_metric.update(**kwargs)   
     elif name == 'valid':
-      self.valid.update(**kwargs)  
+      self.valid_metric.update(**kwargs)  
     elif name == 'test':
-      self.test.update(**kwargs) 
+      self.test_metric.update(**kwargs) 
 
   def print(self, name):
     if name == 'train':
-      self.train.print('train') 
+      self.train_metric.print('train') 
     elif name == 'valid':
-      self.valid.print('valid')  
+      self.valid_metric.print('valid')  
     elif name == 'test':
-      self.test.print('test') 
+      self.test_metric.print('test') 
 
 #----------------------------------------------------------------------
 
