@@ -153,7 +153,7 @@ class Trainer():
 
 
   def check_lr_decay(self, val):
-  	self.lr_decay.check(val)
+    self.lr_decay.check(val)
 
 
 #------------------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ class Trainer():
 class LRDecay():
   def __init__(self, optimizer, decay_rate=0.3, patience=10, metric='loss'):
 
-  	self.optimizer = optimizer
+    self.optimizer = optimizer
     self.lr = optimizer.lr
     self.decay_rate = decay_rate
     self.patience = patience
