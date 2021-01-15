@@ -69,7 +69,7 @@ def interpretability_performance(X, score, X_model):
   for j, gs in enumerate(score):
 
     # calculate information of ground truth
-    gt_info = np.log2(4) + np.sum(X_model[j]*np.log2(X_model[j]+1e-10),axis=0)
+    gt_info = np.log2(4) + np.sum(X_model[j]*np.log2(X_model[j]+1e-10),axis=1)
 
     # set label if information is greater than 0
     label = np.zeros(gt_info.shape)
