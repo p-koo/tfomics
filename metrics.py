@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from sklearn.metrics import roc_curve, auc, precision_recall_curve, accuracy_score
 from scipy import stats
 
