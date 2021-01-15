@@ -3,6 +3,30 @@ import numpy as np
 import tensorflow as tf
 
 
+
+def function_batch(X, fun, batch_size=128, **kwargs):
+  """ run a function in batches """
+
+  dataset = tf.data.Dataset.from_tensor_slices(X)
+  outputs = []
+  for x in dataset.batch(batch_size):
+    outputs.append(fun(x, **kwargs))
+  return np.concatenate(outputs, axis=0)
+
+
+
+def random_shuffle(x, num_samples=1):
+  """ randomly shuffle sequences 
+      assumes x shape is (N,L,A) """
+
+  x_shuffle = []
+  for i in range(num_samples):
+    shuffle = np.random.permutation(x.shape[1])
+    x_shuffle.append(x[0,shuffle,:])
+  return np.array(x_shuffle)
+
+
+
 def make_directory(path, foldername, verbose=1):
     """make a directory"""
 

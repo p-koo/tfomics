@@ -62,12 +62,28 @@ class Trainer():
   @tf.function
   def train_step(self, x, y):
     with tf.GradientTape() as tape:
-      predictions = self.model(x)
-      loss = self.model.loss(y, predictions)
+      predictions = self.model(x, training=True)
+      loss = self.model.loss(y, predictions, training=True)
       gradients = tape.gradient(loss, self.model.trainable_variables)
       
     # Update the weights of our linear layer.
     self.model.optimizer.apply_gradients(zip(gradients, self.model.trainable_weights))
+    return loss, predictions
+
+
+  @tf.function
+  def predict_step(self, x):
+    with tf.GradientTape() as tape:
+      predictions = self.model(x, training=False)
+    return predictions
+
+
+  @tf.function
+  def loss_predict_step(self, x, y):
+    with tf.GradientTape() as tape:
+      predictions = self.model(x, training=False)
+      loss = self.model.loss(y, predictions, training=True)
+
     return loss, predictions
 
 
@@ -94,15 +110,31 @@ class Trainer():
     return running_loss/(i+1), pred, y
 
 
-  def predict(self, x, batch_size=128):
-    pred = self.model.predict(x, batch_size=batch_size)  
+  def predict_batch(self, x, batch_size=128):
+
+    dataset = tf.data.Dataset.from_tensor_slices(x)
+    pred = []
+    for x in dataset.batch(batch_size):
+      pred.append(self.predict_step(x, y))
+    return np.concatenate(pred, axis=0)
+
+    
+    # pred = self.model.predict(x, batch_size=batch_size)  
     return pred
 
 
   def loss_predict(self, x, y, batch_size=128):
-    pred = self.model.predict(x, batch_size=batch_size)  
-    loss = self.model.loss(y, pred)
-    return loss, pred
+    #pred = self.model.predict(x, batch_size=batch_size)  
+    #loss = self.model.loss(y, pred)
+
+    dataset = tf.data.Dataset.from_tensor_slices(x)
+    loss_all = []
+    pred_all = []
+    for x in dataset.batch(batch_size):
+      loss, pred = self.loss_predict_step(x, y)
+      loss_all.append(loss)
+      pred_all.append(pred)
+    return np.concatenate(loss_all, axis=0), np.concatenate(pred_all, axis=0)
 
     
   def update_metrics(self, name, loss, label, prediction, verbose=True):
