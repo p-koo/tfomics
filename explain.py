@@ -23,7 +23,7 @@ class Explainer():
                            class_index=self.class_index, func=self.func) 
 
 
-  def integrated_grad(self, X, baseline_type='random', num_steps=50):
+  def integrated_grad(self, X, baseline_type='random', num_steps=25):
 
     scores = []
     for x in X:
@@ -35,7 +35,7 @@ class Explainer():
     return np.concatenate(scores, axis=0)
 
 
-  def expected_integrated_grad(self, X, num_baseline=25, baseline_type='random', num_steps=50):
+  def expected_integrated_grad(self, X, num_baseline=25, baseline_type='random', num_steps=25):
     
     scores = []
     for x in X:
@@ -93,7 +93,7 @@ def smoothgrad(x, model, num_samples=50, mean=0.0, stddev=0.1,
 
 #------------------------------------------------------------------------------
 
-def integrated_grad(x, model, baseline, num_steps=50, 
+def integrated_grad(x, model, baseline, num_steps=25, 
                          class_index=None, func=tf.math.reduce_mean):
 
   def integral_approximation(gradients):
@@ -117,7 +117,7 @@ def integrated_grad(x, model, baseline, num_steps=50,
 
 #------------------------------------------------------------------------------
 
-def expected_integrated_grad(x, model, baselines, num_steps=50,
+def expected_integrated_grad(x, model, baselines, num_steps=25,
                              class_index=None, func=tf.math.reduce_mean):
   """average integrated gradients across different backgrounds"""
 
