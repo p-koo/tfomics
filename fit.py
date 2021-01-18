@@ -77,7 +77,7 @@ class Trainer():
       preds = self.model(x, training=True)
       loss = self.loss(y, preds)
     gradients = tape.gradient(loss, self.model.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, self.model.trainable_weights))
+    self.optimizer.apply_gradients(zip(gradients, self.model.trainable_weights))
     return loss, preds
 
 
@@ -155,7 +155,7 @@ class Trainer():
     for metric_name in self.metrics[name].metric_names:
       metrics[name+'_'+metric_name] = self.metrics[name].get(metric_name)
     return metrics
-    
+
 
 #------------------------------------------------------------------------------------------
 # Helper classes
