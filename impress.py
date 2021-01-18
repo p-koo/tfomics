@@ -38,7 +38,16 @@ def plot_filters(W, fig, num_cols=8, alphabet='ACGT'):
     for a in range(A):
       for l in range(filter_len):
         counts_df.iloc[l,a] = logo[l,a]
-  return counts_df
+
+    logomaker.Logo(counts_df, ax=ax)
+    ax = plt.gca()
+    ax.set_ylim(0,2)
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.yaxis.set_ticks_position('none')
+    ax.xaxis.set_ticks_position('none')
+    plt.xticks([])
+    plt.yticks([])
 
   
 
