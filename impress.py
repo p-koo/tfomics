@@ -34,7 +34,7 @@ def plot_filters(W, fig, num_cols=8, alphabet='ACGT'):
     logo = I*w
 
     # Create DataFrame for logomaker
-    counts_df = pd.DataFrame(data=0.0, columns=list(alphabet), index=list(range(num_filter)))
+    counts_df = pd.DataFrame(data=0.0, columns=list(alphabet), index=list(range(filter_len)))
     for a in range(A):
       for l in range(filter_len):
         counts_df.iloc[l,a] = logo[l,a]
