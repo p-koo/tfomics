@@ -70,7 +70,7 @@ def match_hits_to_ground_truth(file_path, motifs, motif_names=None, num_filters=
   match_any = (num_matches - correction)/num_filters  # counts hits to any motif (not including Grembl)
 
   # match fraction to ground truth motifs
-  match_index = np.where(filter_qvalue != 1)[0]
+  match_index = np.where(filter_qvalue != 1.)[0]
   if any(match_index):
     match_fraction = len(match_index)/float(num_filters)
   else:
