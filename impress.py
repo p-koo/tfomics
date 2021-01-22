@@ -19,7 +19,7 @@ def plot_attribution_map(saliency_df, ax=None, figsize=(20,1)):
 
 
 
-def plot_filters(W, fig, num_cols=8, alphabet='ACGT'):
+def plot_filters(W, fig, num_cols=8, alphabet='ACGT', names=None, fontsize=12):
   """plot 1st layer convolutional filters"""
 
   num_filter, filter_len, A = W.shape
@@ -48,6 +48,8 @@ def plot_filters(W, fig, num_cols=8, alphabet='ACGT'):
     ax.xaxis.set_ticks_position('none')
     plt.xticks([])
     plt.yticks([])
+    if names:
+      plt.title(names[n], fontsize=fontsize)
 
   
 
