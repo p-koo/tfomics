@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 def make_directory(path, foldername, verbose=1):
-    """make a directory"""
+  """make a directory"""
 
   if not os.path.isdir(path):
     os.mkdir(path)
