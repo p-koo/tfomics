@@ -90,6 +90,8 @@ def match_hits_to_ground_truth(file_path, motifs, motif_names=None, num_filters=
 
   return match_fraction, match_any, filter_match, filter_qvalue, motif_qvalue, motif_counts
 
+
+
 def interpretability_performance(scores, x_model, threshold=0.01):
   """ Compare attribution scores to ground truth (e.g. x_model).
       scores --> (N,L)
@@ -152,7 +154,7 @@ def motif_comparison_synthetic_dataset(file_path, num_filters=32):
   yy1 = ['MA0095.1', 'MA0095.2']
 
   motifs = [arid3, cebpb, fosl1, gabpa, mafk, max1, mef2a, nfyb, sp1, srf, stat1, yy1]
-  motif_names = ['Arid3', 'CEBPB', 'FOSL1', 'GABPA', 'MAFK', 'MAX', 'MEF2A', 'NFYB', 'AP1', 'SRF', 'STAT1', 'YY1']
+  motif_names = ['Arid3', 'CEBPB', 'FOSL1', 'GABPA', 'MAFK', 'MAX', 'MEF2A', 'NFYB', 'SP1', 'SRF', 'STAT1', 'YY1']
   match_fraction, match_any, filter_match, filter_qvalue, min_qvalue, num_counts = match_hits_to_ground_truth(file_path, motifs, motif_names, num_filters)
 
   return match_fraction, match_any, filter_match, filter_qvalue, min_qvalue, num_counts

@@ -25,7 +25,7 @@ def plot_filters(W, fig, num_cols=8, alphabet='ACGT', names=None, fontsize=12):
   num_filter, filter_len, A = W.shape
   num_rows = np.ceil(num_filter/num_cols)
 
-  fig.subplots_adjust(hspace=0.1, wspace=0.1)
+  fig.subplots_adjust(hspace=0.2, wspace=0.2)
   for n, w in enumerate(W):
     ax = fig.add_subplot(num_rows,num_cols,n+1)
     
