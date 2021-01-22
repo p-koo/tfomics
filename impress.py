@@ -49,7 +49,7 @@ def plot_filters(W, fig, num_cols=8, alphabet='ACGT', names=None, fontsize=12):
     plt.xticks([])
     plt.yticks([])
     if names:
-      plt.title(names[n], fontsize=fontsize)
+      plt.ylabel(names[n], fontsize=fontsize)
 
   
 
