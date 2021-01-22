@@ -3,6 +3,8 @@ import pandas as pd
 from sklearn.metrics import roc_curve, auc, precision_recall_curve
 
 
+
+
 def match_hits_to_ground_truth(file_path, motifs, motif_names=None, num_filters=32):
   """ works with Tomtom version 5.1.0 
   inputs:
@@ -66,7 +68,7 @@ def match_hits_to_ground_truth(file_path, motifs, motif_names=None, num_filters=
   filter_match = [motif_names[i] for i in best_match]
 
   # get hits to any motif
-  num_matches = len(np.unique(df['Query_ID'])) - 3  # 3 is correction because of last 3 lines of comments in the tsv file (may change across tomtom versions)
+  num_matches = len(np.unique(df['Query_ID'])) - 3.  # 3 is correction because of last 3 lines of comments in the tsv file (may change across tomtom versions)
   match_any = (num_matches - correction)/num_filters  # counts hits to any motif (not including Grembl)
 
   # match fraction to ground truth motifs
@@ -74,7 +76,7 @@ def match_hits_to_ground_truth(file_path, motifs, motif_names=None, num_filters=
   if any(match_index):
     match_fraction = len(match_index)/float(num_filters)
   else:
-    match_fraction = 0  
+    match_fraction = 0.  
 
   # get the number of hits and minimum q-value for each motif
   num_motifs = len(motifs) - 1
@@ -87,7 +89,6 @@ def match_hits_to_ground_truth(file_path, motifs, motif_names=None, num_filters=
       motif_counts[i] = len(index)
 
   return match_fraction, match_any, filter_match, filter_qvalue, motif_qvalue, motif_counts
-
 
 def interpretability_performance(scores, x_model, threshold=0.01):
   """ Compare attribution scores to ground truth (e.g. x_model).
