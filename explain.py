@@ -189,53 +189,6 @@ def l2_norm(scores):
 
 
 #------------------------------------------------------------------------------
-
-def filter_activations(x_test, model, layer=3, window=20, threshold=0.5):
-  """get alignment of filter activations for visualization"""
-
-  # get feature maps of 1st convolutional layer after activation
-  intermediate = keras.Model(inputs=model.inputs, outputs=model.layers[layer].output)
-  fmap = intermediate.predict(x_test)
-  N,L,A = x_test.shape
-
-  # Set the left and right window sizes
-  window_left = int(window/2)
-  window_right = window - window_left
-
-  W = []
-  for filter_index in range(fmap.shape[-1]):
-
-    # Find regions above threshold
-    coords = np.where(fmap[:,:,filter_index] > np.max(fmap[:,:,filter_index])*threshold)
-    x, y = coords
-
-    # Sort score
-    index = np.argsort(fmap[x,y,filter_index])[::-1]
-    data_index = x[index].astype(int)
-    pos_index = y[index].astype(int)
-
-    # Make a sequence alignment centered about each activation (above threshold)
-    seq_align = []
-    for i in range(len(pos_index)):
-
-      # Determine position of window about each filter activation
-      start_window = pos_index[i] - window_left
-      end_window = pos_index[i] + window_right
-
-      # Check to make sure positions are valid
-      if (start_window > 0) & (end_window < L):
-        seq = x_test[data_index[i],start_window:end_window,:] 
-        seq_align.append(seq)
-    
-    # Calculate position probability matrix
-    if len(seq_align) > 0:
-      W.append(np.mean(seq_align, axis=0))
-    else:
-      W.append(np.ones((window, A))/4)
-  return np.array(W)
-
-
-#------------------------------------------------------------------------------
 # Useful functions
 #------------------------------------------------------------------------------
 
