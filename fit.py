@@ -1,7 +1,6 @@
 import sys, time
 import numpy as np
 import tensorflow as tf
-from . import metrics
 
 
 #------------------------------------------------------------------------------------------
@@ -72,21 +71,22 @@ class Trainer():
     self.metrics['test'] = MonitorMetrics(metric_names, 'test')
 
   @tf.function
-  def train_step(self, x, y):
+  def train_step(self, x, y, metrics):
     with tf.GradientTape() as tape:
       preds = self.model(x, training=True)
       loss = self.loss(y, preds)
     gradients = tape.gradient(loss, self.model.trainable_variables)
     self.optimizer.apply_gradients(zip(gradients, self.model.trainable_weights))
-    return loss, preds
-
+    metrics.update_running_metrics(y, preds)
+    return loss
 
   @tf.function
-  def test_step(self, x, y):
+  def test_step(self, x, y, metrics):
     preds = self.model(x, training=False)
     loss = self.loss(y, preds)
-    return loss, preds
-
+    metrics.update_running_metrics(y, preds)
+    return loss
+    
 
   def train_epoch(self, trainset, batch_size=128, shuffle=True, verbose=True):
     if shuffle:
@@ -94,10 +94,12 @@ class Trainer():
     num_batches = len(list(batch_dataset))
 
     start_time = time.time()
+    running_loss = 0
     for i, (x, y) in enumerate(batch_dataset):      
-      loss_batch, pred = self.train_step(x, y)
-      self.metrics['train'].update_running_loss_metric(loss_batch, y, pred)
-      progress_bar(i+1, num_batches, start_time, bar_length=30, loss=np.mean(self.metrics['train'].running_loss))
+      loss_batch = self.train_step(x, y, self.metrics['train'])
+      self.metrics['train'].running_loss.append(loss_batch)
+      running_loss += loss_batch
+      progress_bar(i+1, num_batches, start_time, bar_length=30, loss=running_loss/(i+1))
     if verbose:
       self.metrics['train'].update_print()
     else:
@@ -108,8 +110,8 @@ class Trainer():
     batch_dataset = dataset.batch(batch_size)
     num_batches = len(list(batch_dataset))
     for i, (x, y) in enumerate(batch_dataset):   
-      loss_batch, pred = self.test_step(x, y)
-      self.metrics[name].update_running_loss_metric(loss_batch, y, pred)
+      loss_batch = self.test_step(x, y, self.metrics[name])
+      self.metrics[name].running_loss.append(loss_batch)
     if verbose:
       self.metrics[name].update_print()
     else:
@@ -121,19 +123,15 @@ class Trainer():
     return pred
 
 
-  def early_stopping(self, metric, patience, criterion='min'):
-    """check if validation loss is not improving and stop after patience
-       runs out. This is an expensive early stopping. """
-
-    status = False
-    vals = self.metrics['valid'].get(metric)
-    if criterion == 'min':
-      index = np.argmin(vals)
-    else:
-      index = np.argmax(vals)
-    if patience - (len(vals) - index - 1) <= 0:
-      status = True
-    return status
+  def set_early_stopping(self, patience=10, metric='loss', criterion='min'):
+    if metric == 'loss':
+      criterion = 'min'
+    else: 
+      criterion = 'max'
+    self.early_stopping = EarlyStopping(patience=patience, metric=metric, criterion=criterion)
+    
+  def check_es(self, name='valid'):
+    self.early_stopping.status(self.metrics[name].get(self.lr_decay.metric)[-1])
 
 
   def set_lr_decay(self, decay_rate, patience, metric):
@@ -155,6 +153,7 @@ class Trainer():
     for metric_name in self.metrics[name].metric_names:
       metrics[name+'_'+metric_name] = self.metrics[name].get(metric_name)
     return metrics
+
 
 
 #------------------------------------------------------------------------------------------
@@ -207,9 +206,40 @@ class LRDecay():
       print('  Decaying learning rate to %.6f'%(self.lr))
 
 
-      
+  
 
-#----------------------------------------------------------------------
+
+class EarlyStopping():
+  def __init__(self, patience=10, metric='loss', criterion='min'):
+
+    self.patience = patience
+    self.metric = metric
+    self.criterion = criterion
+    self.index = 0
+    self.initialize()
+
+  def initialize(self):
+    if self.criterion == 'min':
+      self.best_val = 1e10
+      self.sign = 1
+    else:
+      self.best_val = -1e10
+      self.sign = -1
+
+  def status(self, val):
+    """check if validation loss is not improving and stop after patience
+       runs out"""  
+    status = False
+    if self.sign*val < self.sign*self.best_val:
+      self.best_val = val
+      self.index = 0
+    else:
+      self.index += 1
+      if self.index == self.patience:
+        self.index = 0
+        status = True
+    return status
+
 
 
 class MonitorMetrics():
