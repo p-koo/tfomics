@@ -2,7 +2,7 @@ import sys, time
 import numpy as np
 import tensorflow as tf
 from . import metrics
-from .fit import LRDecay, EarlyStopping 
+from .fit import LRDecay, EarlyStopping, progress_bar 
 
 #------------------------------------------------------------------------------------------
 # Custom fits
