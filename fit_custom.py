@@ -56,6 +56,8 @@ class Trainer():
   def __init__(self, model, loss, optimizer, metrics):
     self.model = model
     self.metric_names = metrics
+    self.loss = loss
+    self.optimizer = optimizer
 
     self.metrics = {}
     self.metrics['train'] = MonitorMetrics('train', metrics)
@@ -67,7 +69,7 @@ class Trainer():
   def train_step(self, x, y):
     with tf.GradientTape() as tape:
       predictions = self.model(x, training=True)
-      loss = self.model.loss(y, predictions)
+      loss = self.loss(y, predictions)
       gradients = tape.gradient(loss, self.model.trainable_variables)
     self.optimizer.apply_gradients(zip(gradients, self.model.trainable_weights))
     return loss, predictions
