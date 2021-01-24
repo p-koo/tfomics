@@ -113,7 +113,7 @@ class Trainer():
     y_batch = []
     running_loss = 0.
     for i, (x, y) in enumerate(batch_dataset):   
-      loss_batch, preds = self.test_step(x, y, training)
+      loss, preds = self.test_step(x, y, training)
       pred_batch.append(preds)
       y_batch.append(y)
       running_loss += loss
