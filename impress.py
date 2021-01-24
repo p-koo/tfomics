@@ -4,6 +4,23 @@ import matplotlib.pyplot as plt
 import logomaker
 
 
+def plot_history(history, names=['train','valid'], metrics=['loss'], ylabel=['Loss'], fontsize=12):
+  """ Plot history from training"""
+  num_metrics = len(metrics)
+
+  fig = plt.figure(figsize=(num_metrics*5, 3))
+  for i, metric in enumerate(metrics):
+    ax = plt.subplot(1, num_metrics, i+1)
+    for name in names:
+      plt.plot(history[name+'_'+metric])
+      plt.ylabel(ylabel[i], fontsize=fontsize)
+      plt.xlabel('Epoch', fontsize=fontsize)
+    for item in (ax.get_xticklabels() + ax.get_yticklabels()):
+      item.set_fontsize(fontsize)
+  return fig
+
+
+
 def plot_attribution_map(saliency_df, ax=None, figsize=(20,1)):
   """plot an attribution map using logomaker"""
 

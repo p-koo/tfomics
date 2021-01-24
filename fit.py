@@ -83,8 +83,8 @@ class Trainer():
     return loss
 
   @tf.function
-  def test_step(self, x, y, metrics):
-    preds = self.model(x, training=False)
+  def test_step(self, x, y, metrics, training=training):
+    preds = self.model(x, training=training)
     loss = self.loss(y, preds)
     metrics.update_running_metrics(y, preds)
     return loss
@@ -108,11 +108,11 @@ class Trainer():
       self.metrics['train'].update()
 
 
-  def evaluate(self, name, dataset, batch_size=128, verbose=True):
+  def evaluate(self, name, dataset, batch_size=128, verbose=True, training=False):
     batch_dataset = dataset.batch(batch_size)
     num_batches = len(list(batch_dataset))
     for i, (x, y) in enumerate(batch_dataset):   
-      loss_batch = self.test_step(x, y, self.metrics[name])
+      loss_batch = self.test_step(x, y, self.metrics[name], training)
       self.metrics[name].running_loss.append(loss_batch)
     if verbose:
       self.metrics[name].update_print()

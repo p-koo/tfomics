@@ -18,7 +18,7 @@ def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verb
   validset = tf.data.Dataset.from_tensor_slices(validation_data)
 
   # set up trainer
-  trainer = Trainer(model, metrics)
+  trainer = Trainer(model, loss, optimizer, metrics)
   trainer.set_lr_decay(decay_rate=lr_decay, patience=lr_patience, metric=lr_metric)
 
 
@@ -53,14 +53,14 @@ def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verb
 
 
 class Trainer():
-  def __init__(self, model, metric_names):
+  def __init__(self, model, loss, optimizer, metrics):
     self.model = model
     self.metric_names = metric_names
 
     self.metrics = {}
-    self.metrics['train'] = MonitorMetrics('train', metric_names)
-    self.metrics['valid'] = MonitorMetrics('valid', metric_names)
-    self.metrics['test'] = MonitorMetrics('test', metric_names)
+    self.metrics['train'] = MonitorMetrics('train', metrics)
+    self.metrics['valid'] = MonitorMetrics('valid', metrics)
+    self.metrics['test'] = MonitorMetrics('test', metrics)
 
 
   @tf.function
@@ -69,13 +69,13 @@ class Trainer():
       predictions = self.model(x, training=True)
       loss = self.model.loss(y, predictions)
       gradients = tape.gradient(loss, self.model.trainable_variables)
-    self.model.optimizer.apply_gradients(zip(gradients, self.model.trainable_weights))
+    self.optimizer.apply_gradients(zip(gradients, self.model.trainable_weights))
     return loss, predictions
 
 
   @tf.function
-  def test_step(self, x, y):
-    preds = self.model(x, training=False)
+  def test_step(self, x, y, training=False):
+    preds = self.model(x, training=training)
     loss = self.loss(y, preds)
     return loss, preds
     
@@ -104,13 +104,13 @@ class Trainer():
     self.metrics['train'].update(y, pred)
 
 
-  def evaluate(self, name, dataset, batch_size=128, verbose=True):
+  def evaluate(self, name, dataset, batch_size=128, verbose=True, training=False):
     batch_dataset = dataset.batch(batch_size)
     num_batches = len(list(batch_dataset))
     pred_batch = []
     y_batch = []
     for i, (x, y) in enumerate(batch_dataset):   
-      loss_batch, preds = self.test_step(x, y)
+      loss_batch, preds = self.test_step(x, y, training)
       pred_batch.append(preds)
       y_batch.append(y)
     pred = np.concatenate(pred_batch, axis=0)
