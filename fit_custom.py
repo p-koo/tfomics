@@ -152,7 +152,7 @@ class Trainer():
   def get_metrics(self, name, metrics=None):
     if metrics is None:
       metrics = {}
-    metric[name+'_loss'] = self.metrics[name].value['loss']
+    metrics[name+'_loss'] = self.metrics[name].value['loss']
     for metric_name in self.metrics[name].metric_names:
       metrics[name+'_'+metric_name] = self.metrics[name].value[metric_name]
     return metrics
