@@ -19,7 +19,7 @@ def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verb
 
   # set up trainer
   trainer = Trainer(model, loss, optimizer, metrics)
-  trainer.set_lr_decay(decay_rate=lr_decay, patience=lr_patience, metric=lr_metric)
+  trainer.set_lr_decay(decay_rate=lr_decay, patience=lr_patience, metric=lr_metric, criterion=lr_criterion)
   trainer.set_early_stopping(patience=es_patience, metric=es_metric, criterion=es_criterion)
 
   for epoch in range(num_epochs):  
@@ -146,7 +146,6 @@ class Trainer():
 
 
   def check_lr_decay(self, name='valid'):
-    print(self.metrics[name].value[self.lr_decay.metric][-1])
     self.lr_decay.check(self.metrics[name].value[self.lr_decay.metric][-1])
 
 
