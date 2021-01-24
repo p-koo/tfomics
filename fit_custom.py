@@ -102,7 +102,7 @@ class Trainer():
     y = np.concatenate(y_batch, axis=0)
 
     # update metrics
-    self.metrics['train'].update(loss=running_loss/num_batches)
+    self.metrics['train'].update_loss(running_loss/num_batches)
     self.metrics['train'].update(y, pred)
 
 
@@ -119,7 +119,7 @@ class Trainer():
     y = np.concatenate(y_batch, axis=0)
 
     # update metrics
-    self.metrics[name].update(loss=loss)
+    self.metrics[name].update_loss(loss)
     self.metrics[name].update(y, pred)
     if verbose:
         self.metrics[name].print()
@@ -205,6 +205,10 @@ class MonitorMetrics():
     return metric_vals
 
 
+  def update_loss(self, loss):
+    self.value['loss'].append(loss)
+      
+
   def update(self, label, pred): 
 
     # calculate metrics   
@@ -213,8 +217,7 @@ class MonitorMetrics():
     #  update metric dictionary
     for metric_name in metric_vals.keys():
       self.value[metric_name].append(np.nanmean(metric_vals[metric_name]))
-      if metric_name != 'loss':
-        self.value[metric_name+'_std'].append(np.nanstd(metric_vals[metric_name]))
+      self.value[metric_name+'_std'].append(np.nanstd(metric_vals[metric_name]))
 
 
   def print(self):
