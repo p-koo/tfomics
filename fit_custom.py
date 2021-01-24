@@ -119,7 +119,6 @@ class Trainer():
       running_loss += loss
     pred = np.concatenate(pred_batch, axis=0)
     y = np.concatenate(y_batch, axis=0)
-    loss = np.concatenate(loss, axis=0)
 
     # update metrics
     self.metrics[name].update_loss(running_loss/num_batches)
