@@ -146,6 +146,7 @@ class Trainer():
 
 
   def check_lr_decay(self, name='valid'):
+    print(self.metrics[name].value[self.lr_decay.metric][-1])
     self.lr_decay.check(self.metrics[name].value[self.lr_decay.metric][-1])
 
 
