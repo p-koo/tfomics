@@ -111,18 +111,18 @@ class Trainer():
     num_batches = len(list(batch_dataset))
     pred_batch = []
     y_batch = []
-    loss = []
+    running_loss = 0.
     for i, (x, y) in enumerate(batch_dataset):   
       loss_batch, preds = self.test_step(x, y, training)
       pred_batch.append(preds)
       y_batch.append(y)
-      loss.append(loss_batch)
+      running_loss += loss
     pred = np.concatenate(pred_batch, axis=0)
     y = np.concatenate(y_batch, axis=0)
     loss = np.concatenate(loss, axis=0)
 
     # update metrics
-    self.metrics[name].update_loss(np.mean(loss))
+    self.metrics[name].update_loss(running_loss/num_batches)
     self.metrics[name].update(y, pred)
     if verbose:
         self.metrics[name].print()
