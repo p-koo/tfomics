@@ -29,7 +29,7 @@ def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verb
     trainer.train_epoch(trainset, shuffle=shuffle, batch_size=batch_size, verbose=verbose)
 
     # validation performance
-    trainer.evaluate('valid', valid_set, batch_size=batch_size, verbose=verbose)
+    trainer.evaluate('valid', validset, batch_size=batch_size, verbose=verbose)
 
     # check learning rate decay
     trainer.check_lr_decay('valid')
