@@ -55,7 +55,7 @@ def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verb
 class Trainer():
   def __init__(self, model, loss, optimizer, metrics):
     self.model = model
-    self.metric_names = metric_names
+    self.metric_names = metrics
 
     self.metrics = {}
     self.metrics['train'] = MonitorMetrics('train', metrics)
