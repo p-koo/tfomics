@@ -4,20 +4,20 @@ from scipy import stats
 
 
 
-def evaluate(label, pred, metric_names, verbose=True):      
+def evaluate(label, pred, metrics, verbose=True):      
   metric_vals = {}
-  if 'acc' in metric_names:
-    metric_vals['acc'] = metrics.accuracy(label, pred)
-  if 'auroc' in metric_names:
-    metric_vals['auroc'] = metrics.auroc(label, pred)
-  if 'aupr' in metric_names:
-    metric_vals['aupr'] = metrics.aupr(label, pred)
-  if 'rsquare' in metric_names:
-    metric_vals['rsquare'] = metrics.rsquare(label, pred)
-  if 'corr' in metric_names:
-    metric_vals['corr'] = metrics.pearsonr(label, pred)
+  if 'acc' in metrics:
+    metric_vals['acc'] = accuracy(label, pred)
+  if 'auroc' in metrics:
+    metric_vals['auroc'] = auroc(label, pred)
+  if 'aupr' in metrics:
+    metric_vals['aupr'] = aupr(label, pred)
+  if 'rsquare' in metrics:
+    metric_vals['rsquare'] = rsquare(label, pred)
+  if 'corr' in metrics:
+    metric_vals['corr'] = pearsonr(label, pred)
   if verbose:  
-    for metric_name in metric_names:
+    for metric_name in metrics:
         print("%s:\t%.5f+/-%.5f"%(metric_name, np.mean(metric_vals[metric_name]), 
                                   np.std(metric_vals[metric_name])))        
   return metric_vals
