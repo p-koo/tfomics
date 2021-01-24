@@ -83,7 +83,7 @@ class Trainer():
     return loss
 
   @tf.function
-  def test_step(self, x, y, metrics, training=training):
+  def test_step(self, x, y, metrics, training=False):
     preds = self.model(x, training=training)
     loss = self.loss(y, preds)
     metrics.update_running_metrics(y, preds)
