@@ -137,7 +137,7 @@ class Trainer():
 
     
   def check_early_stopping(self, name='valid'):
-    self.early_stopping.status(self.metrics[name].value[self.early_stopping.metric][-1])
+    return self.early_stopping.status(self.metrics[name].value[self.early_stopping.metric][-1])
 
 
   def set_lr_decay(self, decay_rate, patience, metric='loss', criterion='min'):
@@ -152,6 +152,7 @@ class Trainer():
   def get_metrics(self, name, metrics=None):
     if metrics is None:
       metrics = {}
+    metric[name+'_loss'] = self.metrics[name].value['loss']
     for metric_name in self.metrics[name].metric_names:
       metrics[name+'_'+metric_name] = self.metrics[name].value[metric_name]
     return metrics
@@ -223,10 +224,9 @@ class MonitorMetrics():
 
 
   def print(self):
+
+    print("  " + self.name + " loss:\t{:.5f}".format(self.value['loss'][-1]))    
     for metric_name in self.metric_names:
-      if metric_name == 'loss':
-        print("  " + self.name + " "+ metric_name+":\t{:.5f}".format(self.value[metric_name][-1]))
-      else:
         print("  " + self.name + " "+ metric_name+":\t{:.5f}+/-{:.5f}"
                                     .format(self.value[metric_name][-1], 
                                             self.value[metric_name+'_std'][-1]))
