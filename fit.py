@@ -9,8 +9,8 @@ import tensorflow as tf
 
 def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verbose=True,  
                  metrics=['auroc', 'aupr'], num_epochs=100, batch_size=128, shuffle=True, 
-                 es_patience=10, es_metric='auroc', criterion='max',
-                 lr_decay=0.3, lr_patience=3, lr_metric='auroc'):
+                 es_patience=10, es_metric='auroc', es_criterion='max',
+                 lr_decay=0.3, lr_patience=3, lr_metric='auroc', lr_criterion='max'):
 
 
   # create tensorflow dataset
@@ -21,7 +21,8 @@ def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verb
   trainer = Trainer(model, loss, optimizer, metrics)
 
   # set up learning rate decay
-  lrdecay = trainer.set_lr_decay(decay_rate=lr_decay, patience=lr_patience, metric=lr_metric)
+  trainer.set_lr_decay(decay_rate=lr_decay, patience=lr_patience, metric=lr_metric, criterion=lr_criterion)
+  trainer.set_early_stopping(patience=es_patience, metric=es_metric, criterion=es_criterion)
 
   # train model
   for epoch in range(num_epochs):  
@@ -34,13 +35,14 @@ def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verb
     trainer.evaluate('valid', validset, batch_size=batch_size, verbose=verbose)
 
     # check learning rate decay
-    trainer.check_lr_decay()
+    trainer.check_lr_decay('valid')
    
     # check early stopping
-    if trainer.early_stopping(es_metric, patience=es_patience, criterion=criterion):
+    if trainer.check_early_stopping('valid'):
       print("Patience ran out... Early stopping.")
       break
   
+  # compile history
   history = trainer.get_metrics('train')
   history = trainer.get_metrics('valid', history)
 
@@ -124,21 +126,14 @@ class Trainer():
 
 
   def set_early_stopping(self, patience=10, metric='loss', criterion='min'):
-    if metric == 'loss':
-      criterion = 'min'
-    else: 
-      criterion = 'max'
     self.early_stopping = EarlyStopping(patience=patience, metric=metric, criterion=criterion)
     
-  def check_es(self, name='valid'):
-    self.early_stopping.status(self.metrics[name].get(self.lr_decay.metric)[-1])
+
+  def check_early_stopping(self, name='valid'):
+    self.early_stopping.status(self.metrics[name].get(self.early_stopping.metric)[-1])
 
 
-  def set_lr_decay(self, decay_rate, patience, metric):
-    if metric == 'loss':
-      criterion = 'min'
-    else: 
-      criterion = 'max'
+  def set_lr_decay(self, decay_rate, patience, metric='loss', criterion='min'):
     self.lr_decay = LRDecay(optimizer=self.optimizer, decay_rate=decay_rate, 
                             patience=patience, metric=metric, criterion=criterion)
 
