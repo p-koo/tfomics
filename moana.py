@@ -115,10 +115,10 @@ def count_meme_entries(motif_path):
 #---------------------------------------------------------------------------------------
 # motif comparison
 
-def tomtom(motif_path, jaspar_path, output_path, evalue=False, thresh=0.5, dist='pearson', png=None):
+def tomtom(motif_path, jaspar_path, output_path, evalue=False, thresh=0.5, dist='pearson', png=None, tomtom_path='tomtom'):
   """ perform tomtom analysis """
   "dist: allr | ​ ed | ​ kullback | ​ pearson | ​ sandelin"
-  cmd = ['./src/tomtom','-thresh', str(thresh), '-dist', dist]
+  cmd = [tomtom_path,'-thresh', str(thresh), '-dist', dist]
   if evalue:
     cmd.append('-evalue')  
   if png:
