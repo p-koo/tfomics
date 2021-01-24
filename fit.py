@@ -19,8 +19,6 @@ def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verb
 
   # create trainer class
   trainer = Trainer(model, loss, optimizer, metrics)
-
-  # set up learning rate decay
   trainer.set_lr_decay(decay_rate=lr_decay, patience=lr_patience, metric=lr_metric, criterion=lr_criterion)
   trainer.set_early_stopping(patience=es_patience, metric=es_metric, criterion=es_criterion)
 

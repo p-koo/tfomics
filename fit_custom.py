@@ -20,7 +20,7 @@ def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verb
   # set up trainer
   trainer = Trainer(model, loss, optimizer, metrics)
   trainer.set_lr_decay(decay_rate=lr_decay, patience=lr_patience, metric=lr_metric)
-
+  trainer.set_early_stopping(patience=es_patience, metric=es_metric, criterion=es_criterion)
 
   for epoch in range(num_epochs):  
     sys.stdout.write("\rEpoch %d \n"%(epoch+1))
