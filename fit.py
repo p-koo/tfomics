@@ -123,7 +123,7 @@ class Trainer():
     return pred
 
 
-  def set_early_stopping(self, patience=10, metric='loss', criterion='min'):
+  def set_early_stopping(self, patience=10, metric='loss', criterion=None):
     self.early_stopping = EarlyStopping(patience=patience, metric=metric, criterion=criterion)
     
 
@@ -131,7 +131,7 @@ class Trainer():
     return self.early_stopping.status(self.metrics[name].get(self.early_stopping.metric)[-1])
 
 
-  def set_lr_decay(self, decay_rate, patience, metric='loss', criterion='min'):
+  def set_lr_decay(self, decay_rate, patience, metric='loss', criterion=None):
     self.lr_decay = LRDecay(optimizer=self.optimizer, decay_rate=decay_rate, 
                             patience=patience, metric=metric, criterion=criterion)
 
@@ -155,13 +155,19 @@ class Trainer():
 
 
 class LRDecay():
-  def __init__(self, optimizer, decay_rate=0.3, patience=10, metric='loss', criterion='min'):
+  def __init__(self, optimizer, decay_rate=0.3, patience=10, metric='loss', criterion=None):
 
     self.optimizer = optimizer
     self.lr = optimizer.lr
     self.decay_rate = tf.constant(decay_rate)
     self.patience = patience
     self.metric = metric
+
+    if criterion is None:
+      if metric == 'loss'
+      criterion = 'min'
+    else: 
+      criterion = 'max'
     self.criterion = criterion
     self.index = 0
     self.initialize()
@@ -203,10 +209,16 @@ class LRDecay():
 
 
 class EarlyStopping():
-  def __init__(self, patience=10, metric='loss', criterion='min'):
+  def __init__(self, patience=10, metric='loss', criterion=None):
 
     self.patience = patience
     self.metric = metric
+
+    if criterion is None:
+      if metric == 'loss'
+      criterion = 'min'
+    else: 
+      criterion = 'max'
     self.criterion = criterion
     self.index = 0
     self.initialize()

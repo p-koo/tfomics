@@ -3,6 +3,26 @@ from sklearn.metrics import roc_auc_score, average_precision_score, accuracy_sco
 from scipy import stats
 
 
+
+def evaluate(label, pred, metric_names, verbose=True):      
+  metric_vals = {}
+  if 'acc' in metric_names:
+    metric_vals['acc'] = metrics.accuracy(label, pred)
+  if 'auroc' in metric_names:
+    metric_vals['auroc'] = metrics.auroc(label, pred)
+  if 'aupr' in metric_names:
+    metric_vals['aupr'] = metrics.aupr(label, pred)
+  if 'rsquare' in metric_names:
+    metric_vals['rsquare'] = metrics.rsquare(label, pred)
+  if 'corr' in metric_names:
+    metric_vals['corr'] = metrics.pearsonr(label, pred)
+  if verbose:  
+    for metric_name in metric_names:
+        print("%s:\t%.5f+/-%.5f"%(metric_name, np.mean(metric_vals[metric_name]), 
+                                  np.std(metric_vals[metric_name])))        
+  return metric_vals
+
+
 def auroc(label, prediction):
   """Area under the ROC curve and ROC curves. 
      Input shapes are (N,C) where N is the # of data 
