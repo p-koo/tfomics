@@ -164,10 +164,10 @@ class LRDecay():
     self.metric = metric
 
     if criterion is None:
-      if metric == 'loss'
-      criterion = 'min'
-    else: 
-      criterion = 'max'
+      if metric == 'loss':
+        criterion = 'min'
+      else: 
+        criterion = 'max'
     self.criterion = criterion
     self.index = 0
     self.initialize()
@@ -215,10 +215,10 @@ class EarlyStopping():
     self.metric = metric
 
     if criterion is None:
-      if metric == 'loss'
-      criterion = 'min'
-    else: 
-      criterion = 'max'
+      if metric == 'loss':
+        criterion = 'min'
+      else: 
+        criterion = 'max'
     self.criterion = criterion
     self.index = 0
     self.initialize()
