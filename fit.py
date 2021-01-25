@@ -106,6 +106,36 @@ class Trainer():
       self.metrics['train'].update()
 
 
+
+  def robust_train_epoch(self, trainset, attacker, batch_size=128, shuffle=True, burn_in=0, mix=False, verbose=True):
+    if shuffle:
+      batch_dataset = trainset.shuffle(buffer_size=batch_size).batch(batch_size)
+    num_batches = len(list(batch_dataset))
+
+    start_time = time.time()
+    running_loss = 0
+    for i, (x, y) in enumerate(batch_dataset):    
+      
+      # generate perturbations
+      if epoch >= burn_in:
+        x_perturb = attacker.generate(x, y)  # object from attacks.py
+      
+      # mix real and perturbed data together
+      if mix:
+        x_perturb = tf.concat([x_perturb, x], axis=0)
+        y = tf.concat([y, y], axis=0)
+
+      loss_batch = self.train_step(x, y, self.metrics['train'])
+      self.metrics['train'].running_loss.append(loss_batch)
+      running_loss += loss_batch
+      progress_bar(i+1, num_batches, start_time, bar_length=30, loss=running_loss/(i+1))
+    if verbose:
+      self.metrics['train'].update_print()
+    else:
+      self.metrics['train'].update()
+
+
+
   def evaluate(self, name, dataset, batch_size=128, verbose=True, training=False):
     batch_dataset = dataset.batch(batch_size)
     num_batches = len(list(batch_dataset))

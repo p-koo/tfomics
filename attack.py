@@ -1,9 +1,5 @@
 import tensorflow as tf
 
-#-------------------------------------------------------------------------------------------
-# Tensorflow-based attack
-#-------------------------------------------------------------------------------------------
-
 @tf.function
 def input_grad_batch(input_var, y, model, loss):
   with tf.GradientTape() as tape:
