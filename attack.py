@@ -53,7 +53,7 @@ class NoiseAttack():
     self.mean = mean
     self.stddev = stddev
 
-  def generate(self, x):
+  def generate(self, x, y):
     return x + tf.random.normal(x.shape, mean=self.mean, stddev=self.stddev)
     
 
