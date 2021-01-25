@@ -5,7 +5,7 @@ import numpy as np
 
 
 class CustomModel(keras.Model):
-	""" Example of a custom model in keras """
+    """ Example of a custom model in keras """
     def train_step(self, data):
         # Unpack the data. Its structure depends on your model and
         # on what you pass to `fit()`.
@@ -42,7 +42,7 @@ class CustomModel(keras.Model):
         return {m.name: m.result() for m in self.metrics}
 
 
-	def test_step(self, data):
+    def test_step(self, data):
         # Unpack the data
         x, y = data
         # Compute predictions
@@ -56,11 +56,11 @@ class CustomModel(keras.Model):
         return {m.name: m.result() for m in self.metrics}
 
 
-    #@property
-    #def metrics(self):
-        # We list our `Metric` objects here so that `reset_states()` can be
-        # called automatically at the start of each epoch
-        # or at the start of `evaluate()`.
-        # If you don't implement this property, you have to call
-        # `reset_states()` yourself at the time of your choosing.
-        #return [loss_tracker, mae_metric]
+        #@property
+        #def metrics(self):
+            # We list our `Metric` objects here so that `reset_states()` can be
+            # called automatically at the start of each epoch
+            # or at the start of `evaluate()`.
+            # If you don't implement this property, you have to call
+            # `reset_states()` yourself at the time of your choosing.
+            #return [loss_tracker, mae_metric]
