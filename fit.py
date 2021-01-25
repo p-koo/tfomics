@@ -265,10 +265,10 @@ class MonitorMetrics():
       self.metric_update['acc'] = tf.keras.metrics.BinaryAccuracy()
       self.metric['acc'] = []
     if 'auroc' in metric_names:
-      self.metric_update['auroc'] = tf.keras.metrics.AUC(curve='ROC', multi_label=True)
+      self.metric_update['auroc'] = tf.keras.metrics.AUC(curve='ROC')
       self.metric['auroc'] = []
     if 'aupr' in metric_names:
-      self.metric_update['aupr'] = tf.keras.metrics.AUC(curve='PR', multi_label=True)
+      self.metric_update['aupr'] = tf.keras.metrics.AUC(curve='PR')
       self.metric['aupr'] = []
     if 'cosine' in metric_names:
       self.metric_update['cosine'] = tf.keras.metrics.CosineSimilarity()
