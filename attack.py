@@ -21,7 +21,7 @@ class PGDAttack():
 
   def generate(self, x, y):
     x_pgd = tf.identity(x)
-    for i in range(num_steps):
+    for i in range(self.num_steps):
       self.input_var.assign(x_pgd)
       delta = input_grad_batch(self.input_var, y, self.model, self.loss)
       x_pgd += self.learning_rate*tf.math.sign(delta)      
