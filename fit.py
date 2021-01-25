@@ -90,7 +90,8 @@ class Trainer():
 
   def train_epoch(self, trainset, batch_size=128, shuffle=True, verbose=True):
     if shuffle:
-      batch_dataset = trainset.shuffle(buffer_size=batch_size).batch(batch_size)
+      trainset.shuffle(buffer_size=batch_size)
+    batch_dataset = trainset.batch(batch_size)
     num_batches = len(list(batch_dataset))
 
     start_time = time.time()
@@ -109,13 +110,17 @@ class Trainer():
 
   def robust_train_epoch(self, trainset, attacker, batch_size=128, shuffle=True, mix=False, verbose=True):
     if shuffle:
-      batch_dataset = trainset.shuffle(buffer_size=batch_size).batch(batch_size)
+      trainset.shuffle(buffer_size=batch_size)
+    batch_dataset = trainset.batch(batch_size)
     num_batches = len(list(batch_dataset))
+    if np.mod(len(trainset), batch_size) != 0:
+      num_batches -= 1
 
     start_time = time.time()
     running_loss = 0
     for i, (x, y) in enumerate(batch_dataset):    
       if len(x) == batch_size:
+
         # generate perturbations
         x_perturb = attacker.generate(x, y)  # object from attacks.py
         
