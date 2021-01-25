@@ -1,0 +1,11 @@
+
+TFomics_synthetic_multitask_analysis.ipynb
+https://colab.research.google.com/drive/1jeAjDwsEbLKMMsOvRdPMe26iqbLBoM6j?usp=sharing
+
+TFomics_synthetic_code_analysis.ipynb
+https://colab.research.google.com/drive/1zq3K9n_HiicD1DjMmJIsAYtVHLFy6Qw-?usp=sharing
+
+TFomics_interpretability_example.ipynb
+https://colab.research.google.com/drive/1fWI2959Qe0YVkUp1yK9Z8-hbEL7iAZe-?usp=sharing
+
+
