@@ -1,11 +1,11 @@
 
-import evaluate 
-import explain 
-import fit 
-import layers 
-import metrics 
-import moana 
-import utils 
-import adversarial 
-import fit_custom 
-import model_custom 
+from . import evaluate 
+from . import explain 
+from . import fit 
+from . import layers 
+from . import metrics 
+from . import moana 
+from . import utils 
+from . import adversarial 
+from . import fit_custom 
+from . import model_custom 
