@@ -107,7 +107,7 @@ class Trainer():
 
 
 
-  def robust_train_epoch(self, trainset, attacker, batch_size=128, shuffle=True, burn_in=0, mix=False, verbose=True):
+  def robust_train_epoch(self, trainset, attacker, batch_size=128, shuffle=True, mix=False, verbose=True):
     if shuffle:
       batch_dataset = trainset.shuffle(buffer_size=batch_size).batch(batch_size)
     num_batches = len(list(batch_dataset))
@@ -117,8 +117,7 @@ class Trainer():
     for i, (x, y) in enumerate(batch_dataset):    
       
       # generate perturbations
-      if epoch >= burn_in:
-        x_perturb = attacker.generate(x, y)  # object from attacks.py
+      x_perturb = attacker.generate(x, y)  # object from attacks.py
       
       # mix real and perturbed data together
       if mix:
