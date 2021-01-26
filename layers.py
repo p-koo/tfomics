@@ -2,6 +2,97 @@ import tensorflow as tf
 from tensorflow import keras
 
 
+#-----------------------------------------------------------------------------
+# Reverse complement convolution 1D
+#-----------------------------------------------------------------------------
+
+class RevCompConv1D(keras.layers.Conv1D):
+  """
+  Implement forward and reverse-complement filter convolutions
+  for 1D signals. It takes as input either a single input or two inputs 
+  (where the second input is the reverse complement scan). If a single input, 
+  this performs both forward and reverse complement scans and either merges it 
+  (if concat=True) or returns a separate scan for forward and reverse comp. 
+  """
+  def __init__(self, *args, concat=False, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.concat = concat
+
+
+  def call(self, inputs, inputs2=None, mask=None):
+    if self._is_causal:  # Apply causal padding to inputs for Conv1D.
+      inputs = array_ops.pad(inputs, self._compute_causal_padding(inputs))
+
+    if inputs2 is not None:
+      # create rc_kernels
+      rc_kernel = self.kernel[::-1,::-1,:]
+
+      # convolution 1D
+      outputs = self._convolution_op(inputs, self.kernel)
+      rc_outputs = self._convolution_op(inputs2, rc_kernel)
+
+    else:
+      # create rc_kernels
+      rc_kernel = tf.concat([self.kernel, self.kernel[::-1,::-1,:]], axis=-1)
+
+      # convolution 1D
+      outputs = self._convolution_op(inputs, rc_kernel)
+
+      # unstack to forward and reverse strands
+      outputs = tf.unstack(outputs, axis=2)
+      rc_outputs = tf.stack(outputs[self.filters:], axis=2)
+      outputs = tf.stack(outputs[:self.filters], axis=2)
+
+    # add bias
+    if self.use_bias:
+      outputs = nn.bias_add(outputs, self.bias, data_format=self._tf_data_format)
+      rc_outputs = nn.bias_add(rc_outputs, self.bias, data_format=self._tf_data_format)
+
+    # add activations
+    if self.activation is not None:
+      outputs = self.activation(outputs)
+      rc_outputs = self.activation(rc_outputs)
+
+    if self.concat:
+      return tf.concat([outputs, rc_outputs], axis=-1)
+    else:
+      return outputs, rc_outputs
+
+
+class RevCompMeanPool(keras.layers.Layer):
+  """merge forward and reverse complement scans via mean pooling"""
+  def __init__(self, **kwargs):
+    super(RevCompMeanPool, self).__init__(**kwargs)
+
+  def call(self, inputs, inputs2=None, mask=None):
+    if inputs2 is None:
+      num_filters = inputs.get_shape()[2]//2
+      fwd = inputs[:,:,:num_filters]
+      rev = inputs[:,:,num_filters:]
+      return 0.5*(fwd + rev[:,::-1,:])
+    else:
+      return 0.5*(inputs + inputs2[:,::-1,:])
+
+
+class RevCompMaxPool(keras.layers.Layer):
+  """merge forward and reverse complement scans via max pooling"""
+  def __init__(self, **kwargs):
+    super(RevCompMaxPool, self).__init__(**kwargs)
+
+  def call(self, inputs, inputs2=None, mask=None):
+    if inputs2 is None:
+      num_filters = inputs.get_shape()[2]//2
+      fwd = inputs[:,:,:num_filters]
+      rev = inputs[:,:,num_filters:]
+      return tf.maximum(fwd, rev[:,::-1,:])
+    else:
+      return tf.maximum(inputs, inputs2[:,::-1,:])
+
+
+#-----------------------------------------------------------------------------
+# Multi-head attention
+#-----------------------------------------------------------------------------
+
 
 class MultiHeadAttention(keras.layers.Layer):
   def __init__(self, d_model, num_heads):
