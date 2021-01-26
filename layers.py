@@ -42,8 +42,8 @@ class RevCompConv1D(keras.layers.Conv1D):
 
     # add bias
     if self.use_bias:
-      outputs = nn.bias_add(outputs, self.bias, data_format=self._tf_data_format)
-      rc_outputs = nn.bias_add(rc_outputs, self.bias, data_format=self._tf_data_format)
+      outputs = tf.nn.bias_add(outputs, self.bias, data_format=self._tf_data_format)
+      rc_outputs = tf.nn.bias_add(rc_outputs, self.bias, data_format=self._tf_data_format)
 
     # add activations
     if self.activation is not None:
