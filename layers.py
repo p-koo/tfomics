@@ -20,9 +20,6 @@ class RevCompConv1D(keras.layers.Conv1D):
 
 
   def call(self, inputs, inputs2=None, mask=None):
-    if self._is_causal:  # Apply causal padding to inputs for Conv1D.
-      inputs = array_ops.pad(inputs, self._compute_causal_padding(inputs))
-
     if inputs2 is not None:
       # create rc_kernels
       rc_kernel = self.kernel[::-1,::-1,:]
