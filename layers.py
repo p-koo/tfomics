@@ -60,7 +60,8 @@ class RevCompConv1D(keras.layers.Conv1D):
 
 
 class RevCompMeanPool(keras.layers.Layer):
-  """merge forward and reverse complement scans via mean pooling"""
+  """merge forward and reverse complement scans via mean pooling.
+     inspired by https://github.com/luntergroup/EquivariantNetworks/blob/master/core.py"""
   def __init__(self, **kwargs):
     super(RevCompMeanPool, self).__init__(**kwargs)
 
