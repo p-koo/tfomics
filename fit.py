@@ -88,7 +88,7 @@ class Trainer():
     return loss
     
 
-  def train_epoch(self, trainset, batch_size=128, shuffle=True, verbose=True):
+  def train_epoch(self, trainset, batch_size=128, shuffle=True, verbose=False):
     if shuffle:
       trainset.shuffle(buffer_size=batch_size)
     batch_dataset = trainset.batch(batch_size)
@@ -108,7 +108,7 @@ class Trainer():
 
 
 
-  def robust_train_epoch(self, trainset, attacker, batch_size=128, shuffle=True, mix=False, verbose=True):
+  def robust_train_epoch(self, trainset, attacker, batch_size=128, shuffle=True, mix=False, verbose=False):
     if shuffle:
       trainset.shuffle(buffer_size=batch_size)
     batch_dataset = trainset.batch(batch_size)
