@@ -7,6 +7,41 @@ import tensorflow as tf
 # Custom fits
 #------------------------------------------------------------------------------------------
 
+def fit(model, loss, optimizer, x_train, y_train, validation_data, verbose=True,  
+                 metrics=['auroc', 'aupr'], num_epochs=100, batch_size=128, shuffle=True, 
+                 es_patience=10, es_metric='auroc', es_criterion='max'):
+
+
+  # create tensorflow dataset
+  trainset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+  validset = tf.data.Dataset.from_tensor_slices(validation_data)
+
+  # create trainer class
+  trainer = Trainer(model, loss, optimizer, metrics)
+  trainer.set_early_stopping(patience=es_patience, metric=es_metric, criterion=es_criterion)
+
+  # train model
+  for epoch in range(num_epochs):  
+    sys.stdout.write("\rEpoch %d \n"%(epoch+1))
+    
+    # train over epoch
+    trainer.train_epoch(trainset, batch_size=batch_size, shuffle=shuffle, verbose=False)
+
+    # validation performance
+    trainer.evaluate('valid', validset, batch_size=batch_size, verbose=verbose)
+   
+    # check early stopping
+    if trainer.check_early_stopping('valid'):
+      print("Patience ran out... Early stopping.")
+      break
+  
+  # compile history
+  history = trainer.get_metrics('train')
+  history = trainer.get_metrics('valid', history)
+
+  return history, trainer
+
+
 def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verbose=True,  
                  metrics=['auroc', 'aupr'], num_epochs=100, batch_size=128, shuffle=True, 
                  es_patience=10, es_metric='auroc', es_criterion='max',
@@ -46,6 +81,47 @@ def fit_lr_decay(model, loss, optimizer, x_train, y_train, validation_data, verb
 
   return history, trainer
 
+
+
+def fit_lr_schedule(model, loss, optimizer, x_train, y_train, validation_data, verbose=True,  
+                    metrics=['auroc', 'aupr'], num_epochs=100, batch_size=128, shuffle=True, 
+                    es_patience=10, es_metric='auroc', es_criterion='max',
+                    lr_schedule=None):
+
+
+  # create tensorflow dataset
+  trainset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+  validset = tf.data.Dataset.from_tensor_slices(validation_data)
+
+  # create trainer class
+  trainer = Trainer(model, loss, optimizer, metrics)
+  trainer.set_early_stopping(patience=es_patience, metric=es_metric, criterion=es_criterion)
+
+  # train model
+  for epoch in range(num_epochs):  
+    sys.stdout.write("\rEpoch %d \n"%(epoch+1))
+
+    # check learning rate scheduler
+    if epoch in lr_schedule:
+      trainer.set_learning_rate(lr_schedule[epoch])
+      print("  Changed learning rate to: %.6f"%(lr_schedule[epoch]))    
+
+    # train over epoch
+    trainer.train_epoch(trainset, batch_size=batch_size, shuffle=shuffle, verbose=False)
+
+    # validation performance
+    trainer.evaluate('valid', validset, batch_size=batch_size, verbose=verbose)
+
+    # check early stopping
+    if trainer.check_early_stopping('valid'):
+      print("Patience ran out... Early stopping.")
+      break
+  
+  # compile history
+  history = trainer.get_metrics('train')
+  history = trainer.get_metrics('valid', history)
+
+  return history, trainer
 
 
 #------------------------------------------------------------------------------------------
@@ -181,6 +257,9 @@ class Trainer():
       metrics[name+'_'+metric_name] = self.metrics[name].get(metric_name)
     return metrics
 
+
+  def set_learning_rate(self, learning_rate):
+    self.optimizer.learning_rate.assign(learning_rate)
 
 
 #------------------------------------------------------------------------------------------
