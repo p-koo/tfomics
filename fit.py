@@ -129,7 +129,7 @@ class Trainer():
           x_perturb = tf.concat([x_perturb, x], axis=0)
           y = tf.concat([y, y], axis=0)
 
-        loss_batch = self.train_step(x, y, self.metrics['train'])
+        loss_batch = self.train_step(x_perturb, y, self.metrics['train'])
         self.metrics['train'].running_loss.append(loss_batch)
         running_loss += loss_batch
         progress_bar(i+1, num_batches, start_time, bar_length=30, loss=running_loss/(i+1))
