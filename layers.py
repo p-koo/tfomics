@@ -210,6 +210,8 @@ class CategoricalSampleLayer(keras.layers.Layer):
     return gumbel_softmax(logits, temperature, axis, hard)
    
 
+
+
 def gumbel_softmax_sample(logits, temperature, axis=None): 
   """ Draw a sample from the Gumbel-Softmax distribution"""
 

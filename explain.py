@@ -64,6 +64,7 @@ class Explainer():
 
 
 #------------------------------------------------------------------------------
+# Fast functions to calculate gradients and hessians
 
 @tf.function
 def saliency_map(X, model, class_index=None, func=tf.math.reduce_mean):
@@ -78,6 +79,25 @@ def saliency_map(X, model, class_index=None, func=tf.math.reduce_mean):
     else:
       outputs = func(model(X))
   return tape.gradient(outputs, X)
+
+
+
+@tf.function
+def hessian(X, model, class_index=None, func=tf.math.reduce_mean):
+  """fast function to generate saliency maps"""
+  if not tf.is_tensor(X):
+    X = tf.Variable(X)
+
+  with tf.GradientTape() as t2:
+    t2.watch(X)
+    with tf.GradientTape() as t1:
+      t1.watch(X)
+      if class_index is not None:
+        outputs = model(X)[:, class_index]
+      else:
+        outputs = func(model(X))
+    g = t1.gradient(outputs, X)
+  return t2.jacobian(g, X)
 
 
 #------------------------------------------------------------------------------
