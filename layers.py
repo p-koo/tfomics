@@ -6,6 +6,7 @@ from tensorflow import keras
 # Reverse complement convolution 1D
 #-----------------------------------------------------------------------------
 
+
 class RevCompConv1D(keras.layers.Conv1D):
   """
   Implement forward and reverse-complement filter convolutions
@@ -20,6 +21,7 @@ class RevCompConv1D(keras.layers.Conv1D):
 
 
   def call(self, inputs, inputs2=None, mask=None):
+
     if inputs2 is not None:
       # create rc_kernels
       rc_kernel = self.kernel[::-1,::-1,:]
@@ -44,7 +46,7 @@ class RevCompConv1D(keras.layers.Conv1D):
     if self.use_bias:
       outputs = tf.nn.bias_add(outputs, self.bias)
       rc_outputs = tf.nn.bias_add(rc_outputs, self.bias)
-      
+
     # add activations
     if self.activation is not None:
       outputs = self.activation(outputs)
@@ -55,10 +57,10 @@ class RevCompConv1D(keras.layers.Conv1D):
     else:
       return outputs, rc_outputs
 
+      
 
 class RevCompMeanPool(keras.layers.Layer):
-  """merge forward and reverse complement scans via mean pooling.
-     inspired by https://github.com/luntergroup/EquivariantNetworks/blob/master/core.py"""
+  """merge forward and reverse complement scans via mean pooling"""
   def __init__(self, **kwargs):
     super(RevCompMeanPool, self).__init__(**kwargs)
 
@@ -85,7 +87,6 @@ class RevCompMaxPool(keras.layers.Layer):
       return tf.maximum(fwd, rev[:,::-1,:])
     else:
       return tf.maximum(inputs, inputs2[:,::-1,:])
-
 
 #-----------------------------------------------------------------------------
 # Multi-head attention
