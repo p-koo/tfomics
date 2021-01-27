@@ -16,11 +16,11 @@ class RevCompConv1D(keras.layers.Conv1D):
   (if concat=True) or returns a separate scan for forward and reverse comp. 
   """
   def __init__(self, *args, concat=False, **kwargs):
-    super().__init__(*args, **kwargs)
+    super(RevCompConv1D).__init__(*args, **kwargs)
     self.concat = concat
 
 
-  def call(self, inputs, inputs2=None, mask=None):
+  def call(self, inputs, inputs2=None):
 
     if inputs2 is not None:
       # create rc_kernels
@@ -64,7 +64,7 @@ class RevCompMeanPool(keras.layers.Layer):
   def __init__(self, **kwargs):
     super(RevCompMeanPool, self).__init__(**kwargs)
 
-  def call(self, inputs, inputs2=None, mask=None):
+  def call(self, inputs, inputs2=None):
     if inputs2 is None:
       num_filters = inputs.get_shape()[2]//2
       fwd = inputs[:,:,:num_filters]
@@ -79,7 +79,7 @@ class RevCompMaxPool(keras.layers.Layer):
   def __init__(self, **kwargs):
     super(RevCompMaxPool, self).__init__(**kwargs)
 
-  def call(self, inputs, inputs2=None, mask=None):
+  def call(self, inputs, inputs2=None):
     if inputs2 is None:
       num_filters = inputs.get_shape()[2]//2
       fwd = inputs[:,:,:num_filters]
@@ -173,6 +173,88 @@ def scaled_dot_product_attention(q, k, v):
   output = tf.matmul(attention_weights, v)  # (..., seq_len_q, depth_v)
 
   return output, attention_weights
+
+
+
+#-----------------------------------------------------------------------------
+# Sampling Layers
+#-----------------------------------------------------------------------------
+
+
+class GaussianSampleLayer(keras.layers.Layer):
+  """
+  Samples independent Gaussians using reparameterization trick 
+  """
+
+  def __init__(self, mean=0.0, stddev=0.1, **kwargs):
+    super(GaussianSampleLayer, self).__init__(**kwargs)
+    self.mean = mean
+    self.stddev = stddev
+
+  def call(self, input_mu, input_logvar):
+    sigma = tf.math.sqrt(tf.math.exp(incoming_logvar) + 1e-7)
+    z = tf.random_normal(shape=tf.shape(incoming_mu), mean=self.mean, stddev=self.stddev, dtype=input_mu.dtype)
+    return input_mu + tf.multiply(sigma, z)
+    
+    
+
+class CategoricalSampleLayer(keras.layers.Layer):
+  """
+  Samples independent Gaussians using reparameterization trick 
+  """
+
+  def __init__(self, **kwargs):
+    super(CategoricalSampleLayer, self).__init__(**kwargs)
+
+  def call(self, inputs, temperature, axis=1, hard=False):
+    return gumbel_softmax(logits, temperature, axis, hard)
+   
+
+def gumbel_softmax_sample(logits, temperature, axis=None): 
+  """ Draw a sample from the Gumbel-Softmax distribution"""
+
+  def sample_gumbel(shape, eps=1e-20): 
+    """Sample from Gumbel(0, 1)"""
+    U = tf.random.uniform(shape, minval=0, maxval=1)
+    return -tf.math.log(-tf.math.log(U + eps) + eps)
+
+  y = logits + sample_gumbel(tf.shape(logits))
+  return tf.nn.softmax(y/temperature, axis=axis)
+
+
+def gumbel_softmax(logits, temperature, axis=1, hard=False):
+  """Sample from the Gumbel-Softmax distribution and optionally discretize.
+  Args:
+    logits: [batch_size, n_class] unnormalized log-probs
+    temperature: non-negative scalar
+    hard: if True, take argmax, but differentiate w.r.t. soft sample y
+  Returns:
+    [batch_size, n_class] sample from the Gumbel-Softmax distribution.
+    If hard=True, then the returned sample will be one-hot, otherwise it will
+    be a probabilitiy distribution that sums to 1 across classes
+  """
+  y = gumbel_softmax_sample(logits, temperature, axis)
+  if hard:
+    # k = tf.shape(logits)[-1]
+    # y_hard = tf.cast(tf.one_hot(tf.argmax(y,1),k), y.dtype)
+    y_hard = tf.cast(tf.math.equal(y, tf.math.reduce_max(y, axis=axis, keep_dims=True)), y.dtype)
+    y = tf.stop_gradient(y_hard - y) + y
+  return y
+
+
+
+
+#-----------------------------------------------------------------------------
+# Other Layers
+#-----------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 
 
