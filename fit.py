@@ -189,8 +189,6 @@ class Trainer():
       trainset.shuffle(buffer_size=batch_size)
     batch_dataset = trainset.batch(batch_size)
     num_batches = len(list(batch_dataset))
-    if np.mod(len(trainset), batch_size) != 0:
-      num_batches -= 1
 
     start_time = time.time()
     running_loss = 0

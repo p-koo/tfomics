@@ -1,11 +1,24 @@
 import tensorflow as tf
-
+"""
 @tf.function
 def input_grad_batch(input_var, y, model, loss):
   with tf.GradientTape() as tape:
     predictions = model(input_var)
     loss_value = loss(y, predictions)
     return tape.gradient(loss_value, input_var) 
+"""
+@tf.function
+def input_grad_batch(X, y, model, loss):
+  """fast function to generate saliency maps"""
+  if not tf.is_tensor(X):
+    X = tf.Variable(X)
+
+  with tf.GradientTape() as tape:
+    tape.watch(X)
+    predictions = model(X)
+    loss_value = loss(y, predictions)
+    return tape.gradient(loss_value, X) 
+
         
         
 class PGDAttack():
@@ -14,7 +27,6 @@ class PGDAttack():
     self.shape = [None].extend(list(shape[1:]))
     self.model = model
     self.loss = loss
-    self.input_var = tf.Variable(tf.zeros(shape), shape=self.shape, dtype=tf.float32, trainable=True)   
     self.learning_rate = tf.Variable(learning_rate, trainable=False)
     self.epsilon = epsilon
     self.num_steps = num_steps
@@ -22,8 +34,7 @@ class PGDAttack():
   def generate(self, x, y):
     x_pgd = tf.identity(x)
     for i in range(self.num_steps):
-      self.input_var.assign(x_pgd)
-      delta = input_grad_batch(self.input_var, y, self.model, self.loss)
+      delta = input_grad_batch(x_pgd, y, self.model, self.loss)
       x_pgd += self.learning_rate*tf.math.sign(delta)      
       x_pgd = tf.clip_by_value(x_pgd, x-self.epsilon, x+self.epsilon) 
       #x = tf.clip_by_value(x, 0, 1) # ensure valid pixel range
@@ -37,12 +48,10 @@ class FGSMAttack():
     self.shape = [None].extend(list(shape[1:]))
     self.model = model
     self.loss = loss
-    self.input_var = tf.Variable(tf.zeros(shape), shape=self.shape, dtype=tf.float32, trainable=True)   
     self.epsilon = epsilon
 
   def generate(self, x, y):
-    self.input_var.assign(x)
-    delta = input_grad_batch(self.input_var, y, self.model, self.loss)
+    delta = input_grad_batch(x, y, self.model, self.loss)
     return x + self.epsilon*tf.math.sign(delta)
 
 
