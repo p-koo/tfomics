@@ -16,7 +16,7 @@ class RevCompConv1D(keras.layers.Conv1D):
   (if concat=True) or returns a separate scan for forward and reverse comp. 
   """
   def __init__(self, *args, concat=False, **kwargs):
-    super(RevCompConv1D).__init__()
+    super(RevCompConv1D).__init__(*args, **kwargs)
     self.concat = concat
 
 
@@ -62,7 +62,7 @@ class RevCompConv1D(keras.layers.Conv1D):
 class RevCompMeanPool(keras.layers.Layer):
   """merge forward and reverse complement scans via mean pooling"""
   def __init__(self, **kwargs):
-    super(RevCompMeanPool, self).__init__()
+    super(RevCompMeanPool, self).__init__(**kwargs)
 
   def call(self, inputs, inputs2=None):
     if inputs2 is None:
@@ -77,7 +77,7 @@ class RevCompMeanPool(keras.layers.Layer):
 class RevCompMaxPool(keras.layers.Layer):
   """merge forward and reverse complement scans via max pooling"""
   def __init__(self, **kwargs):
-    super(RevCompMaxPool, self).__init__()
+    super(RevCompMaxPool, self).__init__(**kwargs)
 
   def call(self, inputs, inputs2=None):
     if inputs2 is None:
@@ -187,7 +187,7 @@ class GaussianSampleLayer(keras.layers.Layer):
   """
 
   def __init__(self, mean=0.0, stddev=0.1, **kwargs):
-    super(GaussianSampleLayer, self).__init__()
+    super(GaussianSampleLayer, self).__init__(**kwargs)
     self.mean = mean
     self.stddev = stddev
 
@@ -204,7 +204,7 @@ class CategoricalSampleLayer(keras.layers.Layer):
   """
 
   def __init__(self, **kwargs):
-    super(CategoricalSampleLayer, self).__init__()
+    super(CategoricalSampleLayer, self).__init__(**kwargs)
 
   def call(self, inputs, temperature, axis=1, hard=False):
     return gumbel_softmax(logits, temperature, axis, hard)
