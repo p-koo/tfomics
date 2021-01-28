@@ -15,8 +15,8 @@ class RevCompConv1D(keras.layers.Conv1D):
   this performs both forward and reverse complement scans and either merges it 
   (if concat=True) or returns a separate scan for forward and reverse comp. 
   """
-  def __init__(self, *args, concat=False, **kwargs):
-    super(RevCompConv1D).__init__(*args, **kwargs)
+  def __init__(self, concat=False):
+    super(RevCompConv1D).__init__()
     self.concat = concat
 
 
@@ -61,8 +61,8 @@ class RevCompConv1D(keras.layers.Conv1D):
 
 class RevCompMeanPool(keras.layers.Layer):
   """merge forward and reverse complement scans via mean pooling"""
-  def __init__(self, **kwargs):
-    super(RevCompMeanPool, self).__init__(**kwargs)
+  def __init__(self):
+    super(RevCompMeanPool, self).__init__()
 
   def call(self, inputs, inputs2=None):
     if inputs2 is None:
@@ -76,8 +76,8 @@ class RevCompMeanPool(keras.layers.Layer):
 
 class RevCompMaxPool(keras.layers.Layer):
   """merge forward and reverse complement scans via max pooling"""
-  def __init__(self, **kwargs):
-    super(RevCompMaxPool, self).__init__(**kwargs)
+  def __init__(self):
+    super(RevCompMaxPool, self).__init__()
 
   def call(self, inputs, inputs2=None):
     if inputs2 is None:
