@@ -40,7 +40,7 @@ def plot_filters(W, fig, num_cols=8, alphabet='ACGT', names=None, fontsize=12):
   """plot 1st layer convolutional filters"""
 
   num_filter, filter_len, A = W.shape
-  num_rows = np.ceil(num_filter/num_cols)
+  num_rows = np.ceil(num_filter/num_cols).astype(int)
 
   fig.subplots_adjust(hspace=0.2, wspace=0.2)
   for n, w in enumerate(W):
