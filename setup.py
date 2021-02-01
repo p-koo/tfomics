@@ -13,6 +13,7 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
@@ -20,7 +21,7 @@ setup(
         "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
     packages=find_packages(),
-    python_requires=">=3.7, <4",
+    python_requires=">=3.6, <4",
     # Do not install tensorflow here, because might want to use tensorflow or
     # tensorflow-cpu.
     install_requires=[
