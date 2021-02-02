@@ -274,13 +274,13 @@ class RobustTrainer(Trainer):
   def robust_train_step(self, x, y, mix=False, verbose=False):
     """performs a training epoch with attack to inputs"""
 
-      x_attack = self.attacker.generate(x, y)  # object from attacks.py
-      
-      # mix real and perturbed data together
-      if mix:
-        x_attack = tf.concat([x_attack, x], axis=0)
-        y = tf.concat([y, y], axis=0)
-      return self.train_step(x_attack, y, self.metrics['train'])
+    x_attack = self.attacker.generate(x, y)  # object from attacks.py
+    
+    # mix real and perturbed data together
+    if mix:
+      x_attack = tf.concat([x_attack, x], axis=0)
+      y = tf.concat([y, y], axis=0)
+    return self.train_step(x_attack, y, self.metrics['train'])
 
 
   def robust_train_epoch(self, trainset, batch_size=128, shuffle=True, mix=False, verbose=False):
