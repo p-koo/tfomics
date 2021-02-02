@@ -142,8 +142,7 @@ def fit_robust(model, loss, optimizer, attacker, x_train, y_train, validation_da
   trainer.set_early_stopping(patience=es_patience, metric=es_metric, criterion=es_criterion)
 
   for i in range(clean_epoch):
-    trainer.train_epoch(trainset, batch_size, shuffle, store=True)
-    trainer.evaluate('valid', valid_set, batch_size, store=True)    
+    trainer.train_epoch(trainset, batch_size, shuffle, store=False)
 
   # train model
   for epoch in range(num_epochs):  
@@ -156,7 +155,6 @@ def fit_robust(model, loss, optimizer, attacker, x_train, y_train, validation_da
       trainer.robust_train_epoch(trainset, batch_size, shuffle, mix=False, store=True)
 
     # validation performance
-    trainer.evaluate('valid', valid_set, batch_size, store=False)    
     trainer.evaluate_attack('valid', validset, batch_size)
 
     # check learning rate decay
@@ -246,7 +244,7 @@ class Trainer():
         self.metrics['train'].update()
 
 
-  def evaluate(self, name, dataset, batch_size=128, verbose=True, training=False, store=True):
+  def evaluate(self, name, dataset, batch_size=128, verbose=True, training=False):
     """Evaluate model in mini-batches"""
     batch_dataset = dataset.batch(batch_size)
     num_batches = len(list(batch_dataset))
@@ -255,11 +253,10 @@ class Trainer():
       self.metrics[name].running_loss.append(loss_batch)
 
     # store evaluation metrics
-    if store:
-      if verbose:
-        self.metrics[name].update_print()
-      else:
-        self.metrics[name].update()   
+    if verbose:
+      self.metrics[name].update_print()
+    else:
+      self.metrics[name].update()   
     
 
   def predict(self, x, batch_size=128):
@@ -384,10 +381,10 @@ class RobustTrainer(Trainer):
                                                np.concatenate(y_attack, axis=0)))
 
 
-  def evaluate_attack(self, name, dataset, batch_size=128, verbose=True, store=True):
+  def evaluate_attack(self, name, dataset, batch_size=128, verbose=True):
     """evaluates model based on compromised data that has been attacked"""
     dataset_attack = self.generate_attack(dataset, batch_size)    
-    self.evaluate(name, dataset_attack, batch_size, verbose, store=store)
+    self.evaluate(name, dataset_attack, batch_size, verbose)
 
 
 
