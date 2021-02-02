@@ -127,7 +127,7 @@ def fit_lr_schedule(model, loss, optimizer, x_train, y_train, validation_data, v
 def fit_robust(model, loss, optimizer, attacker, x_train, y_train, validation_data, 
                num_epochs=200, batch_size=16, shuffle=True, metrics=['auroc','aupr'], 
                clean_epoch=10, mix_epoch=100,  es_start_epoch=100, 
-               es_patience=20, es_metric='auroc', es_criterion='max',
+               es_patience=10, es_metric='auroc', es_criterion='max',
                lr_decay=0.3, lr_patience=10, lr_metric='auroc', lr_criterion='max'):
 
   # create tensorflow dataset
@@ -150,9 +150,9 @@ def fit_robust(model, loss, optimizer, attacker, x_train, y_train, validation_da
     
     # train over epoch
     if epoch < mix_epoch:
-      trainer.robust_train_epoch(trainset, batch_size, shuffle, mix=True, store=True)
+      trainer.robust_train_epoch(trainset, batch_size, shuffle, mix=True)
     else:
-      trainer.robust_train_epoch(trainset, batch_size, shuffle, mix=False, store=True)
+      trainer.robust_train_epoch(trainset, batch_size, shuffle, mix=False)
 
     # validation performance
     trainer.evaluate_attack('valid', validset, batch_size)

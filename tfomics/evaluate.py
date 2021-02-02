@@ -21,18 +21,64 @@ def interpretability_performance(scores, x_model, threshold=0.01):
     label = np.zeros(gt_info.shape)
     label[gt_info > threshold] = 1
 
+
+    # (don't evaluate over low info content motif positions)
+    index = np.where((gt_info > threshold) | (gt_info == np.min(gt_info)))[0]
+
     # precision recall metric
-    precision, recall, thresholds = precision_recall_curve(label, score)
+    precision, recall, thresholds = precision_recall_curve(label[index], score[index])
     pr_score.append(auc(recall, precision))
 
     # roc curve
-    fpr, tpr, thresholds = roc_curve(label, score)
+    fpr, tpr, thresholds = roc_curve(label[index], score[index])
     roc_score.append(auc(fpr, tpr))
 
   roc_score = np.array(roc_score)
   pr_score = np.array(pr_score)
 
   return roc_score, pr_score
+
+
+def signal_to_max_noise(scores, x_model, threshold=0.01):
+  """ratio between averate saliency score at signals vs max noise. Signal and 
+     noise are determined by information content of sequence model (x_model)"""
+
+  signal = []
+  noise = []
+  for j, score in enumerate(scores):
+
+    # calculate information of ground truth
+    gt_info = np.log2(4) + np.sum(x_model[j]*np.log2(x_model[j]+1e-10),axis=1)
+
+    # (don't evaluate over low info content motif positions)
+    index = np.where(gt_info > threshold)[0]
+    signal.append(np.mean(score[index]))
+    
+    # evaluate noise levels
+    index = np.where((score > 0) & (gt_info == np.min(gt_info)))[0]
+    noise.append(np.max(score[index]))
+  return np.array(signal)/np.array(noise)
+
+
+def signal_noise_stats(scores, x_model, threshold=0.01):
+  """averate saliency score at signals and average noise level. Signal and 
+     noise are determined by information content of sequence model (x_model)"""
+
+  signal = []
+  noise = []
+  for j, score in enumerate(scores):
+
+    # calculate information of ground truth
+    gt_info = np.log2(4) + np.sum(x_model[j]*np.log2(x_model[j]+1e-10),axis=1)
+
+    # (don't evaluate over low info content motif positions)
+    index = np.where(gt_info > threshold)[0]
+    signal.append(np.mean(score[index]))
+    
+    # evaluate noise levels
+    index = np.where((score > 0) & (gt_info == np.min(gt_info)))[0]
+    noise.append(np.mean(score[index]))
+  return np.array(signal), np.array(noise)
 
 
 
