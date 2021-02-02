@@ -38,33 +38,14 @@ def interpretability_performance(scores, x_model, threshold=0.01):
   return roc_score, pr_score
 
 
-def signal_to_max_noise(scores, x_model, threshold=0.01):
-  """ratio between averate saliency score at signals vs max noise. Signal and 
-     noise are determined by information content of sequence model (x_model)"""
-
-  signal = []
-  noise = []
-  for j, score in enumerate(scores):
-
-    # calculate information of ground truth
-    gt_info = np.log2(4) + np.sum(x_model[j]*np.log2(x_model[j]+1e-10),axis=1)
-
-    # (don't evaluate over low info content motif positions)
-    index = np.where(gt_info > threshold)[0]
-    signal.append(np.mean(score[index]))
-    
-    # evaluate noise levels
-    index = np.where((score > 0) & (gt_info == np.min(gt_info)))[0]
-    noise.append(np.max(score[index]))
-  return np.array(signal)/np.array(noise)
-
-
-def signal_noise_stats(scores, x_model, threshold=0.01):
+def signal_noise_stats(scores, x_model, top_k=10, threshold=0.01):
   """averate saliency score at signals and average noise level. Signal and 
      noise are determined by information content of sequence model (x_model)"""
 
   signal = []
-  noise = []
+  noise_mean = []
+  noise_max = []
+  noise_topk = []
   for j, score in enumerate(scores):
 
     # calculate information of ground truth
@@ -76,8 +57,13 @@ def signal_noise_stats(scores, x_model, threshold=0.01):
     
     # evaluate noise levels
     index = np.where((score > 0) & (gt_info == np.min(gt_info)))[0]
-    noise.append(np.mean(score[index]))
-  return np.array(signal), np.array(noise)
+    noise_max.append(np.max(score[index]))
+    noise_mean.append(np.mean(score[index]))
+
+    sort_score = np.sort(score[index])[::-1]
+    noise_topk.append(np.mean(sort_score[:top_k]))
+
+  return np.array(signal), np.array(noise_max), np.array(noise_mean), np.array(noise_topk)
 
 
 
