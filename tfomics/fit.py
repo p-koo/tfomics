@@ -218,7 +218,7 @@ class Trainer():
     return loss
     
 
-  def train_epoch(self, trainset, batch_size=128, shuffle=True, verbose=False):
+  def train_epoch(self, trainset, batch_size=128, shuffle=True, verbose=False, store=True):
     """train over all mini-batches and keep track of metrics"""
 
     # prepare data
@@ -237,23 +237,27 @@ class Trainer():
       progress_bar(i+1, num_batches, start_time, bar_length=30, loss=running_loss/(i+1))
 
     # store training metrics
-    if verbose:
-      self.metrics['train'].update_print()
-    else:
-      self.metrics['train'].update()
+    if store:
+      if verbose:
+        self.metrics['train'].update_print()
+      else:
+        self.metrics['train'].update()
 
 
-  def evaluate(self, name, dataset, batch_size=128, verbose=True, training=False):
+  def evaluate(self, name, dataset, batch_size=128, verbose=True, training=False, store=True):
     """Evaluate model in mini-batches"""
     batch_dataset = dataset.batch(batch_size)
     num_batches = len(list(batch_dataset))
     for i, (x, y) in enumerate(batch_dataset):   
       loss_batch = self.test_step(x, y, self.metrics[name], training)
       self.metrics[name].running_loss.append(loss_batch)
-    if verbose:
-      self.metrics[name].update_print()
-    else:
-      self.metrics[name].update()   
+
+    # store evaluation metrics
+    if store:
+      if verbose:
+        self.metrics[name].update_print()
+      else:
+        self.metrics[name].update()   
     
 
   def predict(self, x, batch_size=128):
