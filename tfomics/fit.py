@@ -142,7 +142,8 @@ def fit_robust(model, loss, optimizer, attacker, x_train, y_train, validation_da
   trainer.set_early_stopping(patience=es_patience, metric=es_metric, criterion=es_criterion)
 
   for i in range(clean_epoch):
-    trainer.train_epoch(trainset, batch_size, shuffle, verbose=False)
+    trainer.train_epoch(trainset, batch_size, shuffle, store=True)
+    trainer.evaluate('valid', valid_set, batch_size, store=True)    
 
   # train model
   for epoch in range(num_epochs):  
@@ -150,11 +151,12 @@ def fit_robust(model, loss, optimizer, attacker, x_train, y_train, validation_da
     
     # train over epoch
     if epoch < mix_epoch:
-      trainer.robust_train_epoch(trainset, batch_size, shuffle, mix=True, verbose=False)
+      trainer.robust_train_epoch(trainset, batch_size, shuffle, mix=True, store=True)
     else:
-      trainer.robust_train_epoch(trainset, batch_size, shuffle, mix=False, verbose=False)
+      trainer.robust_train_epoch(trainset, batch_size, shuffle, mix=False, store=True)
 
     # validation performance
+    trainer.evaluate('valid', valid_set, batch_size, store=False)    
     trainer.evaluate_attack('valid', validset, batch_size)
 
     # check learning rate decay
