@@ -124,6 +124,7 @@ def fit_lr_schedule(model, loss, optimizer, x_train, y_train, validation_data, v
   return history, trainer
 
 
+
 #------------------------------------------------------------------------------------------
 # Trainer class
 #------------------------------------------------------------------------------------------
@@ -137,10 +138,12 @@ class Trainer():
     self.loss = loss
     self.optimizer = optimizer
 
+    # metrics to monitor
     metric_names = []
     for metric in metrics:
         metric_names.append(metric)
 
+    # class to help monitor metrics
     self.metrics = {}
     self.metrics['train'] = MonitorMetrics(metric_names, 'train')
     self.metrics['valid'] = MonitorMetrics(metric_names, 'valid')
@@ -148,6 +151,7 @@ class Trainer():
 
   @tf.function
   def train_step(self, x, y, metrics):
+    """training step for a mini-batch"""
     with tf.GradientTape() as tape:
       preds = self.model(x, training=True)
       loss = self.loss(y, preds)
@@ -158,6 +162,7 @@ class Trainer():
 
   @tf.function
   def test_step(self, x, y, metrics, training=False):
+    """test step for a mini-batch"""
     preds = self.model(x, training=training)
     loss = self.loss(y, preds)
     metrics.update_running_metrics(y, preds)
@@ -165,11 +170,15 @@ class Trainer():
     
 
   def train_epoch(self, trainset, batch_size=128, shuffle=True, verbose=False):
+    """train over all mini-batches and keep track of metrics"""
+
+    # prepare data
     if shuffle:
       trainset.shuffle(buffer_size=batch_size)
     batch_dataset = trainset.batch(batch_size)
     num_batches = len(list(batch_dataset))
 
+    # train loop over all mini-batches 
     start_time = time.time()
     running_loss = 0
     for i, (x, y) in enumerate(batch_dataset):      
@@ -177,42 +186,16 @@ class Trainer():
       self.metrics['train'].running_loss.append(loss_batch)
       running_loss += loss_batch
       progress_bar(i+1, num_batches, start_time, bar_length=30, loss=running_loss/(i+1))
+
+    # store training metrics
     if verbose:
       self.metrics['train'].update_print()
     else:
       self.metrics['train'].update()
-
-
-
-  def robust_train_epoch(self, trainset, attacker, batch_size=128, shuffle=True, mix=False, verbose=False):
-    if shuffle:
-      trainset.shuffle(buffer_size=batch_size)
-    batch_dataset = trainset.batch(batch_size)
-    num_batches = len(list(batch_dataset))
-
-    start_time = time.time()
-    running_loss = 0
-    for i, (x, y) in enumerate(batch_dataset):    
-      # generate perturbations
-      x_perturb = attacker.generate(x, y)  # object from attacks.py
-      
-      # mix real and perturbed data together
-      if mix:
-        x_perturb = tf.concat([x_perturb, x], axis=0)
-        y = tf.concat([y, y], axis=0)
-
-      loss_batch = self.train_step(x_perturb, y, self.metrics['train'])
-      self.metrics['train'].running_loss.append(loss_batch)
-      running_loss += loss_batch
-      progress_bar(i+1, num_batches, start_time, bar_length=30, loss=running_loss/(i+1))
-    if verbose:
-      self.metrics['train'].update_print()
-    else:
-      self.metrics['train'].update()
-
 
 
   def evaluate(self, name, dataset, batch_size=128, verbose=True, training=False):
+    """Evaluate model in mini-batches"""
     batch_dataset = dataset.batch(batch_size)
     num_batches = len(list(batch_dataset))
     for i, (x, y) in enumerate(batch_dataset):   
@@ -225,27 +208,33 @@ class Trainer():
     
 
   def predict(self, x, batch_size=128):
+    """Get predictions of model"""
     pred = self.model.predict(x, batch_size=batch_size)  
     return pred
 
 
   def set_early_stopping(self, patience=10, metric='loss', criterion=None):
+    """set up early stopping"""
     self.early_stopping = EarlyStopping(patience=patience, metric=metric, criterion=criterion)
     
 
   def check_early_stopping(self, name='valid'):
+    """check status of early stopping"""
     return self.early_stopping.status(self.metrics[name].get(self.early_stopping.metric)[-1])
 
 
   def set_lr_decay(self, decay_rate, patience, metric='loss', criterion=None):
+    """set up learning rate decay"""
     self.lr_decay = LRDecay(optimizer=self.optimizer, decay_rate=decay_rate, 
                             patience=patience, metric=metric, criterion=criterion)
 
   def check_lr_decay(self, name='valid'):
+    """check status and update learning rate decay"""
     self.lr_decay.check(self.metrics[name].get(self.lr_decay.metric)[-1])
 
 
   def get_metrics(self, name, metrics=None):
+    """return a dictionary of metrics stored throughout training"""
     if metrics is None:
       metrics = {}
     metrics[name+'_loss'] = self.metrics[name].loss
@@ -255,7 +244,97 @@ class Trainer():
 
 
   def set_learning_rate(self, learning_rate):
+    """short-cut to set the learning rate"""
     self.optimizer.learning_rate.assign(learning_rate)
+
+
+
+
+
+
+class RobustTrainer(Trainer):
+  """Custom robust training loop (inherits all functions/variables from Trainer)"""
+
+  def __init__(self, attacker, model, loss, optimizer, metrics):
+    self.attacker = attacker
+    self.model = model
+    self.loss = loss
+    self.optimizer = optimizer
+
+    metric_names = []
+    for metric in metrics:
+        metric_names.append(metric)
+
+    self.metrics = {}
+    self.metrics['train'] = MonitorMetrics(metric_names, 'train')
+    self.metrics['valid'] = MonitorMetrics(metric_names, 'valid')
+    self.metrics['test'] = MonitorMetrics(metric_names, 'test')
+
+
+  def robust_train_step(self, x, y, mix=False, verbose=False):
+    """performs a training epoch with attack to inputs"""
+
+      x_attack = self.attacker.generate(x, y)  # object from attacks.py
+      
+      # mix real and perturbed data together
+      if mix:
+        x_attack = tf.concat([x_attack, x], axis=0)
+        y = tf.concat([y, y], axis=0)
+      return self.train_step(x_attack, y, self.metrics['train'])
+
+
+  def robust_train_epoch(self, trainset, batch_size=128, shuffle=True, mix=False, verbose=False):
+    """performs a training epoch with attack to inputs"""
+
+    # prepare dataset
+    if shuffle:
+      trainset.shuffle(buffer_size=batch_size)
+    batch_dataset = trainset.batch(batch_size)
+    num_batches = len(list(batch_dataset))
+
+    # loop through mini-batches and perform robust training steps
+    start_time = time.time()
+    running_loss = 0
+    for i, (x, y) in enumerate(batch_dataset):    
+      loss_batch = self.robust_train_step(x, y, mix, verbose)
+      self.metrics['train'].running_loss.append(loss_batch)
+      running_loss += loss_batch
+      progress_bar(i+1, num_batches, start_time, bar_length=30, loss=running_loss/(i+1))
+
+    # store training metrics
+    if verbose:
+      self.metrics['train'].update_print()
+    else:
+      self.metrics['train'].update()
+    
+
+  def generate_attack(self, dataset, batch_size=128):
+    """generates attack using mini-batches """
+
+    # batch data
+    batch_dataset = dataset.batch(batch_size)
+    num_batches = len(list(batch_dataset))
+    if np.mod(len(dataset), batch_size) != 0:
+      num_batches -= 1
+
+    # generate attacks and return as tensorflow dataset
+    x_attack = []
+    y_attack = []
+    for i, (x, y) in enumerate(batch_dataset):    
+      if len(x) == batch_size:
+        x_attack.append(self.attacker.generate(x, y))
+        y_attack.append(y)
+    return tf.data.Dataset.from_tensor_slices((np.concatenate(x_attack, axis=0), 
+                                               np.concatenate(y_attack, axis=0)))
+
+
+  def evaluate_attack(self, name, dataset, batch_size=128, verbose=True):
+    """evaluates model based on compromised data that has been attacked"""
+    dataset_attack = self.generate_attack(dataset, batch_size)    
+    self.evaluate(name, dataset_attack, batch_size, verbose)
+
+
+
 
 
 #------------------------------------------------------------------------------------------
@@ -303,18 +382,19 @@ class LRDecay():
         status = True
     return status
 
-  def decay_learning_rate(self):
-    self.lr = self.lr * self.decay_rate
-    self.optimizer.learning_rate.assign(self.lr)
-
 
   def check(self, val):
+    """ check status of learning rate decay"""
     if self.status(val):
       self.decay_learning_rate()
       print('  Decaying learning rate to %.6f'%(self.lr))
 
 
-  
+  def decay_learning_rate(self):
+    """ sets a new learning rate based on decay rate"""
+    self.lr = self.lr * self.decay_rate
+    self.optimizer.learning_rate.assign(self.lr)
+
 
 
 class EarlyStopping():

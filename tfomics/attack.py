@@ -1,4 +1,7 @@
+
 import tensorflow as tf
+
+
 """
 @tf.function
 def input_grad_batch(input_var, y, model, loss):
@@ -20,7 +23,7 @@ def input_grad_batch(X, y, model, loss):
     return tape.gradient(loss_value, X) 
 
         
-        
+
 class PGDAttack():
   def __init__(self, shape, model, loss, learning_rate=0.1, epsilon=0.1, num_steps=10):
     
@@ -66,12 +69,4 @@ class NoiseAttack():
     return x + tf.random.normal(x.shape, mean=self.mean, stddev=self.stddev)
     
 
-
-
-
-
-
-
-
-    
 

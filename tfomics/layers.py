@@ -64,14 +64,18 @@ class RevCompMeanPool(keras.layers.Layer):
   def __init__(self, **kwargs):
     super(RevCompMeanPool, self).__init__(**kwargs)
 
-  def call(self, inputs, inputs2=None):
+  def call(self, inputs, inputs2=None, reverse=True):
     if inputs2 is None:
       num_filters = inputs.get_shape()[2]//2
       fwd = inputs[:,:,:num_filters]
       rev = inputs[:,:,num_filters:]
-      return 0.5*(fwd + rev[:,::-1,:])
     else:
-      return 0.5*(inputs + inputs2[:,::-1,:])
+      fwd = inputs
+      rev = inputs2
+
+    if reverse:
+      rev = rev[:,::-1,:]
+    return 0.5*(fwd + rev)
 
 
 class RevCompMaxPool(keras.layers.Layer):
@@ -79,14 +83,18 @@ class RevCompMaxPool(keras.layers.Layer):
   def __init__(self, **kwargs):
     super(RevCompMaxPool, self).__init__(**kwargs)
 
-  def call(self, inputs, inputs2=None):
+  def call(self, inputs, inputs2=None, reverse=True):
     if inputs2 is None:
       num_filters = inputs.get_shape()[2]//2
       fwd = inputs[:,:,:num_filters]
       rev = inputs[:,:,num_filters:]
-      return tf.maximum(fwd, rev[:,::-1,:])
     else:
-      return tf.maximum(inputs, inputs2[:,::-1,:])
+      fwd = inputs
+      rev = inputs2
+
+    if reverse:
+      rev = rev[:,::-1,:]
+    return tf.maximum(fwd, rev)
 
 #-----------------------------------------------------------------------------
 # Multi-head attention
