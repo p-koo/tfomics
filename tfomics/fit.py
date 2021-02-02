@@ -324,7 +324,7 @@ class RobustTrainer(Trainer):
     self.metrics['test'] = MonitorMetrics(metric_names, 'test')
 
 
-  def robust_train_step(self, x, y, mix=False, verbose=False):
+  def robust_train_step(self, x, y, mix=False, verbose=False, store=store):
     """performs a training epoch with attack to inputs"""
 
     x_attack = self.attacker.generate(x, y)  # object from attacks.py
@@ -336,7 +336,7 @@ class RobustTrainer(Trainer):
     return self.train_step(x_attack, y, self.metrics['train'])
 
 
-  def robust_train_epoch(self, trainset, batch_size=128, shuffle=True, mix=False, verbose=False):
+  def robust_train_epoch(self, trainset, batch_size=128, shuffle=True, mix=False, verbose=False, store=True):
     """performs a training epoch with attack to inputs"""
 
     # prepare dataset
@@ -355,10 +355,11 @@ class RobustTrainer(Trainer):
       progress_bar(i+1, num_batches, start_time, bar_length=30, loss=running_loss/(i+1))
 
     # store training metrics
-    if verbose:
-      self.metrics['train'].update_print()
-    else:
-      self.metrics['train'].update()
+    if store:
+      if verbose:
+        self.metrics['train'].update_print()
+      else:
+        self.metrics['train'].update()
     
 
   def generate_attack(self, dataset, batch_size=128):
@@ -381,10 +382,10 @@ class RobustTrainer(Trainer):
                                                np.concatenate(y_attack, axis=0)))
 
 
-  def evaluate_attack(self, name, dataset, batch_size=128, verbose=True):
+  def evaluate_attack(self, name, dataset, batch_size=128, verbose=True, store=True):
     """evaluates model based on compromised data that has been attacked"""
     dataset_attack = self.generate_attack(dataset, batch_size)    
-    self.evaluate(name, dataset_attack, batch_size, verbose)
+    self.evaluate(name, dataset_attack, batch_size, verbose, store=store)
 
 
 
