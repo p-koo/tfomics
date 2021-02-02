@@ -124,6 +124,55 @@ def fit_lr_schedule(model, loss, optimizer, x_train, y_train, validation_data, v
   return history, trainer
 
 
+def fit_robust(model, loss, optimizer, attacker, x_train, y_train, validation_data, 
+               num_epochs=200, batch_size=16, shuffle=True, metrics=['auroc','aupr'], 
+               clean_epoch=10, mix_epoch=100,  es_start_epoch=100, 
+               es_patience=20, es_metric='auroc', es_criterion='max',
+               lr_decay=0.3, lr_patience=10, lr_metric='auroc', lr_criterion='max'):
+
+  # create tensorflow dataset
+  trainset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+  validset = tf.data.Dataset.from_tensor_slices(validation_data)
+
+  # create trainer class
+  trainer = RobustTrainer(attacker, model, loss, optimizer, metrics)
+
+  # set up learning rate decay
+  trainer.set_lr_decay(decay_rate=lr_decay, patience=lr_patience, metric=lr_metric, criterion=lr_criterion)
+  trainer.set_early_stopping(patience=es_patience, metric=es_metric, criterion=es_criterion)
+
+  for i in range(clean_epoch):
+    trainer.train_epoch(trainset, batch_size, shuffle, verbose=False)
+
+  # train model
+  for epoch in range(num_epochs):  
+    sys.stdout.write("\rEpoch %d \n"%(epoch+1))
+    
+    # train over epoch
+    if epoch < mix_epoch:
+      trainer.robust_train_epoch(trainset, batch_size, shuffle, mix=True, verbose=False)
+    else:
+      trainer.robust_train_epoch(trainset, batch_size, shuffle, mix=False, verbose=False)
+
+    # validation performance
+    trainer.evaluate_attack('valid', validset, batch_size)
+
+    # check learning rate decay
+    trainer.check_lr_decay('valid')
+    
+    # check early stopping
+    if epoch >= es_start_epoch:
+      if trainer.check_early_stopping('valid'):
+        print("Patience ran out... Early stopping.")
+        break
+  
+  # compile history
+  history = trainer.get_metrics('train')
+  history = trainer.get_metrics('valid', history)
+
+  return history, trainer
+
+
 
 #------------------------------------------------------------------------------------------
 # Trainer class
