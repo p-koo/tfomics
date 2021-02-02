@@ -126,8 +126,8 @@ def fit_lr_schedule(model, loss, optimizer, x_train, y_train, validation_data, v
 
 def fit_robust(model, loss, optimizer, attacker, x_train, y_train, validation_data, 
                num_epochs=200, batch_size=16, shuffle=True, metrics=['auroc','aupr'], 
-               clean_epoch=10, mix_epoch=100,  es_start_epoch=100, 
-               es_patience=10, es_metric='auroc', es_criterion='max',
+               clean_epoch=10, mix_epoch=50,  es_start_epoch=50, 
+               es_patience=20, es_metric='auroc', es_criterion='max',
                lr_decay=0.3, lr_patience=10, lr_metric='auroc', lr_criterion='max'):
 
   # create tensorflow dataset

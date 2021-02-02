@@ -21,7 +21,6 @@ def interpretability_performance(scores, x_model, threshold=0.01):
     label = np.zeros(gt_info.shape)
     label[gt_info > threshold] = 1
 
-
     # (don't evaluate over low info content motif positions)
     index = np.where((gt_info > threshold) | (gt_info == np.min(gt_info)))[0]
 

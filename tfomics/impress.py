@@ -2,23 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import logomaker
-
-
-def plot_history(history, names=['train','valid'], metrics=['loss'], ylabel=['Loss'], fontsize=12):
-  """ Plot history from training"""
-  num_metrics = len(metrics)
-
-  fig = plt.figure(figsize=(num_metrics*5, 3))
-  for i, metric in enumerate(metrics):
-    ax = plt.subplot(1, num_metrics, i+1)
-    for name in names:
-      plt.plot(history[name+'_'+metric])
-      plt.ylabel(ylabel[i], fontsize=fontsize)
-      plt.xlabel('Epoch', fontsize=fontsize)
-    for item in (ax.get_xticklabels() + ax.get_yticklabels()):
-      item.set_fontsize(fontsize)
-  return fig
-
+import matplotlib.cm as cm
 
 
 def plot_attribution_map(saliency_df, ax=None, figsize=(20,1)):
@@ -68,8 +52,69 @@ def plot_filters(W, fig, num_cols=8, alphabet='ACGT', names=None, fontsize=12):
     if names:
       plt.ylabel(names[n], fontsize=fontsize)
 
-  
 
+#--------------------------------------------------------------------------------
+# pretty plots
+#--------------------------------------------------------------------------------
+  
+def box_violin_plot(scores, cmap='tab10', ylabel=None, xlabel=None, title=None, fontsize=14):
+  """ Plot box-violin plot to compare list of values within scores """
+
+  # plot violin plot
+  vplot = plt.violinplot(scores, showextrema=False);
+
+  # set colors for biolin plot
+  num_colors = len(scores)
+  cmap = cm.ScalarMappable(cmap=cmap)
+  color_mean = np.linspace(0, 1, num_colors)      
+  for patch, color in zip(vplot['bodies'], cmap.to_rgba(color_mean)):
+    patch.set_facecolor(color)
+    patch.set_edgecolor('black')
+        
+  # plot box plot
+  bplot = plt.boxplot(scores, notch=True, patch_artist=True, widths=0.2,    
+                      medianprops=dict(color="red",linewidth=2), showfliers=False)
+
+  # set colors for box plot
+  for patch, color in zip(bplot['boxes'], cmap.to_rgba(color_mean)):
+    patch.set_facecolor(color)
+    patch.set_edgecolor('black')
+
+  # set up plot params
+  ax = plt.gca();
+  plt.setp(ax.get_yticklabels(), fontsize=fontsize)
+  plt.setp(ax.get_xticklabels(), fontsize=fontsize)
+
+  if ylabel is not None:
+    plt.ylabel(ylabel, fontsize=fontsize);
+  if xlabel is not None:
+    plt.xticks(range(1,num_colors+1), xlabel, fontsize=fontsize, rotation=45, horizontalalignment="right");
+  if title is not None:
+    plt.title(title, fontsize=fontsize)
+
+  return ax
+
+
+def plot_history(history, names=['train','valid'], metrics=['loss'], ylabel=['Loss'], fontsize=12):
+  """ Plot history from training"""
+  num_metrics = len(metrics)
+
+  fig = plt.figure(figsize=(num_metrics*5, 3))
+  for i, metric in enumerate(metrics):
+    ax = plt.subplot(1, num_metrics, i+1)
+    for name in names:
+      plt.plot(history[name+'_'+metric])
+      plt.ylabel(ylabel[i], fontsize=fontsize)
+      plt.xlabel('Epoch', fontsize=fontsize)
+    for item in (ax.get_xticklabels() + ax.get_yticklabels()):
+      item.set_fontsize(fontsize)
+  return fig
+
+
+
+#--------------------------------------------------------------------------------
+# utility functions for logomaker
+#--------------------------------------------------------------------------------
 
 def matrix_to_df(x, w, alphabet='ACGT'):
   """generate pandas dataframe for saliency plot
