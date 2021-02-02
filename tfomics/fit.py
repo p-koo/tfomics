@@ -324,7 +324,7 @@ class RobustTrainer(Trainer):
     self.metrics['test'] = MonitorMetrics(metric_names, 'test')
 
 
-  def robust_train_step(self, x, y, mix=False, verbose=False, store=store):
+  def robust_train_step(self, x, y, mix=False, verbose=False):
     """performs a training epoch with attack to inputs"""
 
     x_attack = self.attacker.generate(x, y)  # object from attacks.py
