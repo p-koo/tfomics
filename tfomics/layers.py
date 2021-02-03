@@ -8,11 +8,7 @@ from tensorflow import keras
 
 class RevCompSplit(keras.layers.Layer):
   """
-  Implement forward and reverse-complement filter convolutions
-  for 1D signals. It takes as input either a single input or two inputs 
-  (where the second input is the reverse complement scan). If a single input, 
-  this performs both forward and reverse complement scans and either merges it 
-  (if concat=True) or returns a separate scan for forward and reverse comp. 
+  Split inputs into forward and reverse complements -- assumes alphabet is ACGT
   """
   def __init__(self, *args, **kwargs):
     super(RevCompSplit, self).__init__(*args, **kwargs)
@@ -109,6 +105,7 @@ class RevCompMaxPool(keras.layers.Layer):
     if reverse:
       rev = rev[:,::-1,:]
     return tf.maximum(fwd, rev)
+
 
 #-----------------------------------------------------------------------------
 # Multi-head attention
