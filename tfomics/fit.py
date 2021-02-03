@@ -367,7 +367,7 @@ class RobustTrainer(Trainer):
     # batch data
     batch_dataset = dataset.batch(batch_size)
     num_batches = len(list(batch_dataset))
-    if np.mod(len(dataset), batch_size) != 0:
+    if np.mod(len(list(dataset)), batch_size) != 0:
       num_batches -= 1
 
     # generate attacks and return as tensorflow dataset
