@@ -16,7 +16,7 @@ class RevCompConv1D(keras.layers.Conv1D):
   (if concat=True) or returns a separate scan for forward and reverse comp. 
   """
   def __init__(self, *args, concat=False, **kwargs):
-    super(RevCompConv1D).__init__(*args, **kwargs)
+    super(RevCompConv1D, self).__init__(*args, **kwargs)
     self.concat = concat
 
 
