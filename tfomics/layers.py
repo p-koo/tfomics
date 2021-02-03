@@ -3,8 +3,22 @@ from tensorflow import keras
 
 
 #-----------------------------------------------------------------------------
-# Reverse complement convolution 1D
+# Reverse complement layers
 #-----------------------------------------------------------------------------
+
+class RevCompSplit(keras.layers.Layer):
+  """
+  Implement forward and reverse-complement filter convolutions
+  for 1D signals. It takes as input either a single input or two inputs 
+  (where the second input is the reverse complement scan). If a single input, 
+  this performs both forward and reverse complement scans and either merges it 
+  (if concat=True) or returns a separate scan for forward and reverse comp. 
+  """
+  def __init__(self, *args, **kwargs):
+    super(RevCompSplit, self).__init__(*args, **kwargs)
+
+  def call(self, inputs):
+    return inputs, inputs[:,::-1,::-1]
 
 
 class RevCompConv1D(keras.layers.Conv1D):
