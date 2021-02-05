@@ -34,11 +34,15 @@ class PGDAttack():
     self.epsilon = epsilon
     self.num_steps = num_steps
 
-  def generate(self, x, y):
+  def generate(self, x, y, grad_sign=True):
     x_pgd = tf.identity(x)
     for i in range(self.num_steps):
       delta = input_grad_batch(x_pgd, y, self.model, self.loss)
-      x_pgd += self.learning_rate*tf.math.sign(delta)      
+      if grad_sign:
+        x_pgd += self.learning_rate*tf.math.sign(delta)     
+      else:
+        x_pgd += self.learning_rate*delta     
+       
       x_pgd = tf.clip_by_value(x_pgd, x-self.epsilon, x+self.epsilon) 
       #x = tf.clip_by_value(x, 0, 1) # ensure valid pixel range
     return x_pgd 

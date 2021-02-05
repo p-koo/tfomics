@@ -126,7 +126,7 @@ def fit_lr_schedule(model, loss, optimizer, x_train, y_train, validation_data, v
 
 def fit_robust(model, loss, optimizer, attacker, x_train, y_train, validation_data, 
                num_epochs=200, batch_size=16, shuffle=True, metrics=['auroc','aupr'], 
-               clean_epoch=10, mix_epoch=50,  es_start_epoch=50, 
+               grad_sign=True, clean_epoch=10, mix_epoch=50,  es_start_epoch=50, 
                es_patience=20, es_metric='auroc', es_criterion='max',
                lr_decay=0.3, lr_patience=10, lr_metric='auroc', lr_criterion='max'):
 
@@ -323,10 +323,10 @@ class RobustTrainer(Trainer):
     self.metrics['test'] = MonitorMetrics(metric_names, 'test')
 
 
-  def robust_train_step(self, x, y, mix=False, verbose=False):
+  def robust_train_step(self, x, y, mix=False, grad_sign=False, verbose=False):
     """performs a training epoch with attack to inputs"""
 
-    x_attack = self.attacker.generate(x, y)  # object from attacks.py
+    x_attack = self.attacker.generate(x, y, grad_sign)  # object from attacks.py
     
     # mix real and perturbed data together
     if mix:
@@ -335,7 +335,7 @@ class RobustTrainer(Trainer):
     return self.train_step(x_attack, y, self.metrics['train'])
 
 
-  def robust_train_epoch(self, trainset, batch_size=128, shuffle=True, mix=False, verbose=False, store=True):
+  def robust_train_epoch(self, trainset, batch_size=128, shuffle=True, mix=False, grad_sign=False, verbose=False, store=True):
     """performs a training epoch with attack to inputs"""
 
     # prepare dataset
@@ -348,7 +348,7 @@ class RobustTrainer(Trainer):
     start_time = time.time()
     running_loss = 0
     for i, (x, y) in enumerate(batch_dataset):    
-      loss_batch = self.robust_train_step(x, y, mix, verbose)
+      loss_batch = self.robust_train_step(x, y, mix, grad_sign, verbose)
       self.metrics['train'].running_loss.append(loss_batch)
       running_loss += loss_batch
       progress_bar(i+1, num_batches, start_time, bar_length=30, loss=running_loss/(i+1))
