@@ -25,7 +25,7 @@ def input_grad_batch(X, y, model, loss):
         
 
 class PGDAttack():
-  def __init__(self, shape, model, loss, learning_rate=0.1, epsilon=0.1, num_steps=10, grad_sign=True):
+  def __init__(self, shape, model, loss, learning_rate=0.1, epsilon=0.1, num_steps=10, grad_sign=True, decay=False):
     
     self.shape = [None].extend(list(shape[1:]))
     self.model = model
@@ -38,12 +38,21 @@ class PGDAttack():
   def generate(self, x, y):
     x_pgd = tf.identity(x)
     for i in range(self.num_steps):
-      delta = input_grad_batch(x_pgd, y, self.model, self.loss)
-      if self.grad_sign:
-        x_pgd += self.learning_rate*tf.math.sign(delta)     
+      if decay:
+        learning_rate = self.learning_rate/(i+10)
       else:
-        x_pgd += self.learning_rate*delta     
-       
+        learning_rate = self.learning_rate
+
+      delta = input_grad_batch(x_pgd, y, self.model, self.loss)
+
+      # convert gradient to a sign (works better than pure gradients)
+      if self.grad_sign:
+        delta = tf.math.sign(delta)  
+
+      # update inputs   
+      x_pgd += learning_rate*delta     
+      
+      # clip so as to project onto max perturbation of epsilon
       x_pgd = tf.clip_by_value(x_pgd, x-self.epsilon, x+self.epsilon) 
       #x = tf.clip_by_value(x, 0, 1) # ensure valid pixel range
     return x_pgd 
