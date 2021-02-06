@@ -34,11 +34,12 @@ class PGDAttack():
     self.epsilon = epsilon
     self.grad_sign = grad_sign
     self.num_steps = num_steps
-
+    self.decay = decay
+    
   def generate(self, x, y):
     x_pgd = tf.identity(x)
     for i in range(self.num_steps):
-      if decay:
+      if self.decay:
         learning_rate = self.learning_rate/(i+10)
       else:
         learning_rate = self.learning_rate
