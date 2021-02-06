@@ -25,20 +25,21 @@ def input_grad_batch(X, y, model, loss):
         
 
 class PGDAttack():
-  def __init__(self, shape, model, loss, learning_rate=0.1, epsilon=0.1, num_steps=10):
+  def __init__(self, shape, model, loss, learning_rate=0.1, epsilon=0.1, num_steps=10, grad_sign=True):
     
     self.shape = [None].extend(list(shape[1:]))
     self.model = model
     self.loss = loss
     self.learning_rate = tf.Variable(learning_rate, trainable=False)
     self.epsilon = epsilon
+    self.grad_sign = grad_sign
     self.num_steps = num_steps
 
-  def generate(self, x, y, grad_sign=True):
+  def generate(self, x, y):
     x_pgd = tf.identity(x)
     for i in range(self.num_steps):
       delta = input_grad_batch(x_pgd, y, self.model, self.loss)
-      if grad_sign:
+      if self.grad_sign:
         x_pgd += self.learning_rate*tf.math.sign(delta)     
       else:
         x_pgd += self.learning_rate*delta     
