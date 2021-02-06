@@ -35,20 +35,22 @@ class PGDAttack():
     self.grad_sign = grad_sign
     self.num_steps = num_steps
     self.decay = decay
-    
+
   def generate(self, x, y):
     x_pgd = tf.identity(x)
     for i in range(self.num_steps):
-      if self.decay:
-        learning_rate = self.learning_rate/(i+10)
-      else:
-        learning_rate = self.learning_rate
 
       delta = input_grad_batch(x_pgd, y, self.model, self.loss)
 
       # convert gradient to a sign (works better than pure gradients)
       if self.grad_sign:
         delta = tf.math.sign(delta)  
+
+      # decay learning rate
+      if self.decay:
+        learning_rate = self.learning_rate/(i+10)
+      else:
+        learning_rate = self.learning_rate
 
       # update inputs   
       x_pgd += learning_rate*delta     
