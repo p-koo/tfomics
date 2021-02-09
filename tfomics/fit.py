@@ -156,12 +156,13 @@ def fit_robust(model, loss, optimizer, attacker, x_train, y_train, validation_da
 
     # validation performance
     trainer.evaluate_attack('valid', validset, batch_size)
-
-    # check learning rate decay
-    trainer.check_lr_decay('valid')
     
     # check early stopping
     if epoch >= es_start_epoch:
+      
+      # check learning rate decay
+      trainer.check_lr_decay('valid')
+
       if trainer.check_early_stopping('valid'):
         print("Patience ran out... Early stopping.")
         break
