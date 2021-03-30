@@ -52,7 +52,7 @@ def signal_noise_stats(scores, x_model, top_k=10, threshold=0.01):
 
     try:
       # (don't evaluate over low info content motif positions)  
-      index = np.where(gt_info > threshold)[0
+      index = np.where(gt_info > threshold)[0]
       signal.append(np.mean(score[index]))
       
       # evaluate noise levels
@@ -62,6 +62,7 @@ def signal_noise_stats(scores, x_model, top_k=10, threshold=0.01):
 
       sort_score = np.sort(score[index])[::-1]
       noise_topk.append(np.mean(sort_score[:top_k]))
+
     except:
       signal.append(0.)
       noise_max.append(0.)
