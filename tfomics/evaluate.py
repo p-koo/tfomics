@@ -47,22 +47,26 @@ def signal_noise_stats(scores, x_model, top_k=10, threshold=0.01):
   noise_max = []
   noise_topk = []
   for j, score in enumerate(scores):
+    if len(score) > 0:
+      # calculate information of ground truth
+      gt_info = np.log2(4) + np.sum(x_model[j]*np.log2(x_model[j]+1e-10),axis=1)
 
-    # calculate information of ground truth
-    gt_info = np.log2(4) + np.sum(x_model[j]*np.log2(x_model[j]+1e-10),axis=1)
+      # (don't evaluate over low info content motif positions)
+      index = np.where(gt_info > threshold)[0]
+      signal.append(np.mean(score[index]))
+      
+      # evaluate noise levels
+      index = np.where((score > 0) & (gt_info == np.min(gt_info)))[0]
+      noise_max.append(np.max(score[index]))
+      noise_mean.append(np.mean(score[index]))
 
-    # (don't evaluate over low info content motif positions)
-    index = np.where(gt_info > threshold)[0]
-    signal.append(np.mean(score[index]))
-    
-    # evaluate noise levels
-    index = np.where((score > 0) & (gt_info == np.min(gt_info)))[0]
-    noise_max.append(np.max(score[index]))
-    noise_mean.append(np.mean(score[index]))
-
-    sort_score = np.sort(score[index])[::-1]
-    noise_topk.append(np.mean(sort_score[:top_k]))
-
+      sort_score = np.sort(score[index])[::-1]
+      noise_topk.append(np.mean(sort_score[:top_k]))
+    else:
+      signal.append(0.)
+      noise_max.append(0.)
+      noise_mean.append(0.)
+      noise_topk.append(0.)
   return np.array(signal), np.array(noise_max), np.array(noise_mean), np.array(noise_topk)
 
 
