@@ -50,27 +50,29 @@ def signal_noise_stats(scores, x_model, top_k=10, threshold=0.01):
     # calculate information of ground truth
     gt_info = np.log2(4) + np.sum(x_model[j]*np.log2(x_model[j]+1e-10),axis=1)
 
-    try:
-      # (don't evaluate over low info content motif positions)  
-      index = np.where(gt_info > threshold)[0]
+    # (don't evaluate over low info content motif positions)  
+    index = np.where(gt_info > threshold)[0]
+    
+    # evaluate noise levels
+    index2 = np.where((score > 0) & (gt_info == np.min(gt_info)))[0]
+
+    if len(index2) < top_k:
+      signal.append(0)
+      noise_max.append(0)
+      noise_mean.append(0)
+      noise_topk.append(0)
+    else:
       signal.append(np.mean(score[index]))
-      
-      # evaluate noise levels
-      index = np.where((score > 0) & (gt_info == np.min(gt_info)))[0]
-      noise_max.append(np.max(score[index]))
-      noise_mean.append(np.mean(score[index]))
-
-      sort_score = np.sort(score[index])[::-1]
+      noise_max.append(np.max(score[index2]))
+      noise_mean.append(np.mean(score[index2]))
+      sort_score = np.sort(score[index2])[::-1]
       noise_topk.append(np.mean(sort_score[:top_k]))
-
-    except:
-      signal.append(0.)
-      noise_max.append(0.)
-      noise_mean.append(0.)
-      noise_topk.append(0.)
   return np.array(signal), np.array(noise_max), np.array(noise_mean), np.array(noise_topk)
 
-
+def calculate_snr(signal, noise):
+  snr = signal/noise
+  return snr[~np.isnan(snr)]
+  
 
 def motif_comparison_synthetic_dataset(file_path, num_filters=32):
   """ Compares tomtom analysis for filters trained on synthetic multitask classification.
