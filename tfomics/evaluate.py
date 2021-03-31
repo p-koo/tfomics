@@ -71,7 +71,8 @@ def signal_noise_stats(scores, x_model, top_k=10, threshold=0.01):
 
 def calculate_snr(signal, noise):
   snr = signal/noise
-  return snr[~np.isnan(snr)]
+  snr[np.isnan(snr)] = 0
+  return snr
   
 
 def motif_comparison_synthetic_dataset(file_path, num_filters=32):
