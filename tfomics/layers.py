@@ -122,9 +122,9 @@ class MultiHeadAttention(keras.layers.Layer):
     
     self.depth = d_model // self.num_heads
     
-    self.wq = keras.layers.Dense(d_model)
-    self.wk = keras.layers.Dense(d_model)
-    self.wv = keras.layers.Dense(d_model)
+    self.wq = keras.layers.Dense(d_model, use_bias=False)
+    self.wk = keras.layers.Dense(d_model, use_bias=False)
+    self.wv = keras.layers.Dense(d_model, use_bias=False)
     
     self.dense = keras.layers.Dense(d_model)
         
