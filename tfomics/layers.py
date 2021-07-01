@@ -113,7 +113,7 @@ class RevCompMaxPool(keras.layers.Layer):
 
 
 class MultiHeadAttention(keras.layers.Layer):
-  def __init__(self, d_model, num_heads):
+  def __init__(self, d_model, num_heads, weight_constraint=None):
     super(MultiHeadAttention, self).__init__()
     self.num_heads = num_heads
     self.d_model = d_model
@@ -122,9 +122,9 @@ class MultiHeadAttention(keras.layers.Layer):
     
     self.depth = d_model // self.num_heads
     
-    self.wq = keras.layers.Dense(d_model, use_bias=False)
-    self.wk = keras.layers.Dense(d_model, use_bias=False)
-    self.wv = keras.layers.Dense(d_model, use_bias=False)
+    self.wq = keras.layers.Dense(d_model, use_bias=False, kernel_constraint=weight_constraint)
+    self.wk = keras.layers.Dense(d_model, use_bias=False, kernel_constraint=weight_constraint)
+    self.wv = keras.layers.Dense(d_model, use_bias=False, kernel_constraint=weight_constraint)
     
     self.dense = keras.layers.Dense(d_model)
         
