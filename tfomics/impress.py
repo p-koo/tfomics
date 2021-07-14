@@ -49,7 +49,7 @@ def plot_filters(W, fig, num_cols=8, alphabet='ACGT', names=None, fontsize=12):
     ax.xaxis.set_ticks_position('none')
     plt.xticks([])
     plt.yticks([])
-    if names:
+    if names is not None:
       plt.ylabel(names[n], fontsize=fontsize)
 
 
