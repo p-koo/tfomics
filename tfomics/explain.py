@@ -5,9 +5,24 @@ from tensorflow import keras
 class Explainer():
   """wrapper class for attribution maps"""
 
-  def __init__(self, model, class_index=None, func=tf.math.reduce_mean):
+  def __init__(
+            self, 
+            model, 
+            class_index=None, 
+            logits_only=False, 
+            func=tf.math.reduce_mean
+              ):
 
-    self.model = model
+    # set up model with the right output layer. 
+    if not logits_only:
+      self.model = model
+    else:
+      if isinstance(self.model.layers[-1], keras.layers.Dense):
+        model.layers[-1].activation = 'linear'
+        self.model = model
+      else:
+        self.model = keras.Model(model.input, model.layers[-2].output, name=model.name)
+
     self.class_index = class_index
     self.func = func
 
