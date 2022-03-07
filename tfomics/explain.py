@@ -14,7 +14,7 @@ class Explainer():
               ):
 
     # set up model with the right output layer. 
-    if logits_only:
+    if not logits_only:
       self.model = model
     else:
       if isinstance(self.model.layers[-1], keras.layers.Dense):
