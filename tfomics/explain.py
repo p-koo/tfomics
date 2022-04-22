@@ -28,7 +28,7 @@ class Explainer():
     scores = []
     for x in X:
       x = np.expand_dims(x, axis=0)
-      baseline = self.set_baseline(x, baseline_type, num_samples=50)
+      baseline = self.set_baseline(x, baseline_type, num_samples=25)
       intgrad_scores = integrated_grad(x, model=self.model, baseline=baseline,
                            num_steps=num_steps, class_index=self.class_index, func=self.func)
       scores.append(intgrad_scores)
