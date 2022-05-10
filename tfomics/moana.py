@@ -222,6 +222,9 @@ def tomtom(motif_path, jaspar_path, output_path, evalue=False, thresh=0.5, dist=
 
   process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   stdout, stderr = process.communicate()
+  if process.returncode != 0:
+    print(stderr)
+    raise RuntimeError("Something went wrong with tomtom. Please see stderr above.")
   return stdout, stderr
 
 
